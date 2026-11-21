@@ -1,0 +1,712 @@
+WEBVTT
+
+00:00:00.450 --> 00:00:06.515
+Shivaar, this is lesson one in the new
+style: RecyclerView, pointer four.
+
+00:00:06.635 --> 00:00:10.236
+First the slides and the study
+guide, in plain words.
+
+00:00:10.356 --> 00:00:13.251
+Then the whiteboard, every line
+explained.
+
+00:00:13.371 --> 00:00:15.091
+Then a real project,
+
+00:00:15.211 --> 00:00:18.233
+built and run on a real Android
+emulator.
+
+00:00:18.353 --> 00:00:22.020
+Then three classic mistakes, run
+for real and fixed.
+
+00:00:22.140 --> 00:00:24.972
+Then your turn: two TODO
+questions.
+
+00:00:26.117 --> 00:00:30.232
+Slide three of Architecting
+Android Lists: the four pillars.
+
+00:00:30.352 --> 00:00:34.855
+The RecyclerView is the display
+glass: a widget in your XML.
+
+00:00:34.975 --> 00:00:36.992
+The Adapter is the engine:
+
+00:00:37.112 --> 00:00:40.522
+a Java class that connects your
+ArrayList to the rows.
+
+00:00:40.642 --> 00:00:43.044
+The ViewHolder is the
+scaffolding:
+
+00:00:43.164 --> 00:00:45.587
+it remembers one row's widgets.
+
+00:00:45.707 --> 00:00:48.451
+The LayoutManager is the site
+manager:
+
+00:00:48.571 --> 00:00:51.337
+it stacks the rows as a list or
+a grid.
+
+00:00:52.492 --> 00:00:54.594
+The study guide says the same,
+
+00:00:54.714 --> 00:01:00.073
+on pages one hundred and fourteen to
+one hundred and fifteen.
+
+00:01:00.193 --> 00:01:03.451
+Almost all the list's behaviour
+lives in the Adapter.
+
+00:01:03.571 --> 00:01:06.188
+The ViewHolder belongs to the
+Adapter.
+
+00:01:06.308 --> 00:01:09.760
+And the LayoutManager measures
+and positions the rows,
+
+00:01:09.880 --> 00:01:12.755
+and decides when a row can be
+recycled.
+
+00:01:13.908 --> 00:01:18.024
+Slide four: component one, the
+XML blueprint.
+
+00:01:18.144 --> 00:01:20.824
+This file describes one row
+only.
+
+00:01:20.944 --> 00:01:23.625
+Android stamps it out again and
+again,
+
+00:01:23.745 --> 00:01:26.210
+once for every item in your
+list.
+
+00:01:27.367 --> 00:01:29.426
+Slide five is the trap.
+
+00:01:29.546 --> 00:01:32.248
+If the row's root height is
+match_parent,
+
+00:01:32.368 --> 00:01:36.522
+one row claims the whole screen.
+Use wrap_content.
+
+00:01:36.642 --> 00:01:40.737
+The study guide, pages one hundred
+and sixteen to seventeen,
+
+00:01:40.857 --> 00:01:42.980
+calls this very important.
+
+00:01:43.100 --> 00:01:46.573
+We'll make this exact mistake
+later, on a real phone.
+
+00:01:47.700 --> 00:01:51.301
+Slide seven: component two, the
+ViewHolder.
+
+00:01:51.421 --> 00:01:54.531
+Its constructor calls super with
+the row's view,
+
+00:01:54.651 --> 00:01:58.403
+then findViewById, once, on
+itemView.
+
+00:01:58.523 --> 00:02:01.031
+Searching the XML is slow,
+
+00:02:01.151 --> 00:02:06.693
+so the ViewHolder caches the result
+and scrolling stays smooth.
+
+00:02:07.825 --> 00:02:12.219
+Slide eight: component three,
+the Adapter, with three gears.
+
+00:02:12.339 --> 00:02:15.104
+getItemCount says how many rows.
+
+00:02:15.224 --> 00:02:18.356
+onCreateViewHolder builds an
+empty row shell.
+
+00:02:18.476 --> 00:02:21.520
+onBindViewHolder fills a shell
+with data.
+
+00:02:22.658 --> 00:02:25.360
+Slide nine shows two gears in
+code.
+
+00:02:25.480 --> 00:02:28.375
+getItemCount returns the list's
+size.
+
+00:02:28.495 --> 00:02:32.032
+onCreateViewHolder inflates the
+row XML,
+
+00:02:32.152 --> 00:02:36.310
+with parent and false, then
+returns a new ContactViewHolder.
+
+00:02:37.450 --> 00:02:39.637
+Slide ten, gear three.
+
+00:02:39.757 --> 00:02:43.037
+onBindViewHolder gets a holder
+and a position.
+
+00:02:43.157 --> 00:02:45.964
+Cast the holder to
+ContactViewHolder,
+
+00:02:46.084 --> 00:02:48.465
+get the Contact at that
+position,
+
+00:02:48.585 --> 00:02:51.371
+and set its name on the cached
+TextView.
+
+00:02:52.492 --> 00:02:56.438
+Here is the study guide's
+version: Listing six point two,
+
+00:02:56.558 --> 00:02:59.153
+on page one hundred and
+seventeen.
+
+00:02:59.273 --> 00:03:01.097
+The same three methods,
+
+00:03:01.217 --> 00:03:03.746
+with the ViewHolder as an inner
+class.
+
+00:03:03.866 --> 00:03:07.488
+Page one hundred and eighteen
+explains it line by line.
+
+00:03:07.608 --> 00:03:13.439
+getItemCount decides how many
+times the other two methods run.
+
+00:03:14.575 --> 00:03:17.298
+Slide twelve: the LayoutManager.
+
+00:03:17.418 --> 00:03:20.528
+LinearLayoutManager gives a
+vertical list.
+
+00:03:20.648 --> 00:03:24.658
+GridLayoutManager, with this and
+two, gives two columns,
+
+00:03:24.778 --> 00:03:26.837
+without touching the Adapter.
+
+00:03:27.992 --> 00:03:32.150
+Slide thirteen wires it all in
+the Activity, in four steps.
+
+00:03:32.270 --> 00:03:34.220
+Find the RecyclerView.
+
+00:03:34.340 --> 00:03:36.291
+Set the LayoutManager.
+
+00:03:36.411 --> 00:03:38.792
+Create the Adapter with the
+data.
+
+00:03:38.912 --> 00:03:40.603
+Set the Adapter.
+
+00:03:40.723 --> 00:03:43.682
+The study guide's Listing six
+point three,
+
+00:03:43.802 --> 00:03:46.718
+pages one hundred and eighteen
+to nineteen,
+
+00:03:46.838 --> 00:03:48.746
+does the same four steps.
+
+00:03:49.867 --> 00:03:51.545
+Now the whiteboard.
+
+00:03:51.665 --> 00:03:56.316
+Step one: the row blueprint,
+simple_item_view dot XML,
+
+00:03:56.436 --> 00:03:58.517
+the study guide's file name.
+
+00:03:58.637 --> 00:04:00.824
+The root is a LinearLayout.
+
+00:04:00.944 --> 00:04:04.675
+Width match_parent, so the row
+is as wide as the list.
+
+00:04:04.795 --> 00:04:09.628
+Height wrap_content: never
+match_parent. Two TextViews.
+
+00:04:09.748 --> 00:04:13.737
+At plus id creates the ids the
+ViewHolder will look for:
+
+00:04:13.857 --> 00:04:16.452
+textViewName and textViewPhone.
+
+00:04:16.572 --> 00:04:21.051
+Sizes in sp, because sp follows
+the user's font setting.
+
+00:04:22.200 --> 00:04:26.294
+Step two: the screen,
+activity_main dot XML.
+
+00:04:26.414 --> 00:04:29.116
+A ConstraintLayout that fills
+the screen.
+
+00:04:29.236 --> 00:04:33.073
+Inside, the RecyclerView, with
+its full class name,
+
+00:04:33.193 --> 00:04:36.237
+androidx dot recyclerview dot
+widget.
+
+00:04:36.357 --> 00:04:38.910
+Its id is rvContacts.
+
+00:04:39.030 --> 00:04:42.482
+Width and height zero dp mean
+match constraint:
+
+00:04:42.602 --> 00:04:47.910
+stretch between the four constraints
+that pin each edge to the parent.
+
+00:04:49.033 --> 00:04:52.549
+Step three: the model, Contact
+dot java.
+
+00:04:52.669 --> 00:04:56.785
+One Contact holds one row's
+data: a name and a phone number.
+
+00:04:56.905 --> 00:05:00.506
+The constructor stores them, and
+the getters hand them back.
+
+00:05:00.626 --> 00:05:03.349
+onBindViewHolder will call
+getName.
+
+00:05:04.492 --> 00:05:06.721
+Step four: the Adapter.
+
+00:05:06.841 --> 00:05:09.694
+It extends RecyclerView dot
+Adapter,
+
+00:05:09.814 --> 00:05:12.258
+and holds an ArrayList of
+Contact.
+
+00:05:12.378 --> 00:05:14.695
+Inside it, the ViewHolder:
+
+00:05:14.815 --> 00:05:18.588
+an inner class that extends
+RecyclerView dot ViewHolder.
+
+00:05:18.708 --> 00:05:22.439
+Its constructor gets itemView,
+one inflated row.
+
+00:05:22.559 --> 00:05:26.739
+Call super first, then
+findViewById on itemView,
+
+00:05:26.859 --> 00:05:28.573
+not on the Activity.
+
+00:05:28.693 --> 00:05:34.093
+The Adapter's own constructor
+receives the list and keeps it.
+
+00:05:35.242 --> 00:05:39.823
+Step five: the three methods.
+onCreateViewHolder:
+
+00:05:39.943 --> 00:05:43.029
+LayoutInflater from the parent's
+context,
+
+00:05:43.149 --> 00:05:46.559
+inflate the row XML with parent
+and false,
+
+00:05:46.679 --> 00:05:49.511
+and wrap it in a new
+ContactViewHolder.
+
+00:05:49.631 --> 00:05:53.725
+onBindViewHolder: cast the
+holder to ContactViewHolder,
+
+00:05:53.845 --> 00:05:57.489
+get the Contact at position, and
+set the name and the phone.
+
+00:05:57.609 --> 00:06:01.424
+getItemCount: return contactData
+dot size.
+
+00:06:01.544 --> 00:06:04.352
+An ArrayList has size, not
+length.
+
+00:06:05.492 --> 00:06:08.493
+Step six: wire it up in
+onCreate.
+
+00:06:08.613 --> 00:06:13.243
+super, then setContentView,
+before any findViewById.
+
+00:06:13.363 --> 00:06:15.723
+Build the ArrayList of contacts.
+
+00:06:15.843 --> 00:06:20.724
+Then the four lines from slide
+thirteen. Find rvContacts.
+
+00:06:20.844 --> 00:06:23.609
+Set a LinearLayoutManager with
+this.
+
+00:06:23.729 --> 00:06:26.815
+Create the ContactAdapter with
+the contacts.
+
+00:06:26.935 --> 00:06:28.626
+Set the Adapter.
+
+00:06:29.783 --> 00:06:31.463
+Now the real thing.
+
+00:06:31.583 --> 00:06:33.685
+This is the actual project,
+
+00:06:33.805 --> 00:06:36.637
+in the standard Android Studio
+folders.
+
+00:06:36.757 --> 00:06:40.724
+Java files under app, source,
+main, java.
+
+00:06:40.844 --> 00:06:43.418
+Layouts under res, layout.
+
+00:06:43.538 --> 00:06:47.354
+Every line has a comment, so you
+can read it on your laptop.
+
+00:06:48.492 --> 00:06:51.772
+Here are the Adapter's three
+methods in the real file,
+
+00:06:51.892 --> 00:06:54.100
+exactly as on the whiteboard.
+
+00:06:55.242 --> 00:06:57.943
+Here is MainActivity in the
+project,
+
+00:06:58.063 --> 00:07:00.959
+with the same four wiring lines
+highlighted.
+
+00:07:02.117 --> 00:07:05.333
+Gradle builds it for real: build
+successful.
+
+00:07:05.453 --> 00:07:08.563
+Then adb installs the app on the
+emulator,
+
+00:07:08.683 --> 00:07:12.992
+a Pixel six running Android
+fourteen, API thirty-four.
+
+00:07:14.117 --> 00:07:17.717
+And here it runs. Fifteen
+contacts.
+
+00:07:17.837 --> 00:07:20.581
+Each row is one copy of the
+blueprint,
+
+00:07:20.701 --> 00:07:23.297
+filled in by onBindViewHolder.
+
+00:07:23.417 --> 00:07:25.540
+I scroll down and back up.
+
+00:07:25.660 --> 00:07:30.965
+Rows that leave the screen are
+reused for the rows coming in.
+
+00:07:31.085 --> 00:07:33.893
+That's the recycling in
+RecyclerView.
+
+00:07:35.033 --> 00:07:38.186
+Mistake one: forget
+setLayoutManager.
+
+00:07:38.306 --> 00:07:42.422
+It still compiles, and it still
+runs, but the list is empty.
+
+00:07:42.542 --> 00:07:47.975
+Logcat gives the clue: No layout
+manager attached, skipping layout.
+
+00:07:48.095 --> 00:07:50.370
+In the exam there's no logcat,
+
+00:07:50.490 --> 00:07:53.385
+so always check all four wiring
+lines.
+
+00:07:54.533 --> 00:07:56.914
+The fix: put the line back.
+
+00:07:57.034 --> 00:07:59.820
+Rebuild, reinstall, rerun.
+
+00:07:59.940 --> 00:08:01.631
+The list is back.
+
+00:08:02.783 --> 00:08:06.536
+Mistake two: the wrap_content
+trap from slide five.
+
+00:08:06.656 --> 00:08:09.209
+The row's root height is
+match_parent.
+
+00:08:09.329 --> 00:08:12.415
+It runs, but each row fills the
+whole screen.
+
+00:08:12.535 --> 00:08:15.494
+I scroll, and there's one
+contact per screen.
+
+00:08:16.617 --> 00:08:19.703
+The fix: wrap_content on the
+row's root.
+
+00:08:19.823 --> 00:08:23.166
+Rebuild, rerun, and many rows
+fit again.
+
+00:08:24.325 --> 00:08:27.883
+Mistake three: inflate with true
+instead of false.
+
+00:08:28.003 --> 00:08:31.220
+It compiles, but the app crashes
+on launch:
+
+00:08:31.340 --> 00:08:35.564
+My Contact List keeps stopping.
+Logcat says:
+
+00:08:35.684 --> 00:08:39.157
+ViewHolder views must not be
+attached when created.
+
+00:08:39.277 --> 00:08:42.878
+RecyclerView attaches the row
+itself, later.
+
+00:08:44.033 --> 00:08:45.878
+The fix: false.
+
+00:08:45.998 --> 00:08:48.742
+Rebuild, rerun, and it works.
+
+00:08:49.867 --> 00:08:51.544
+Key takeaways.
+
+00:08:51.664 --> 00:08:53.344
+Pause and copy them.
+
+00:08:53.464 --> 00:08:57.752
+Four parts: glass, engine,
+cache, site manager.
+
+00:08:57.872 --> 00:08:59.889
+Row height wrap_content.
+
+00:09:00.009 --> 00:09:01.833
+Find on itemView.
+
+00:09:01.953 --> 00:09:04.333
+Inflate with parent and false.
+
+00:09:04.453 --> 00:09:06.704
+Cast, then get position.
+
+00:09:06.824 --> 00:09:09.247
+getItemCount returns size.
+
+00:09:09.367 --> 00:09:15.615
+And four wiring lines: find,
+LayoutManager, Adapter, setAdapter.
+
+00:09:16.742 --> 00:09:18.433
+Your turn.
+
+00:09:18.553 --> 00:09:24.208
+Question one, Java: complete the
+ProductAdapter. Four TODOs.
+
+00:09:24.328 --> 00:09:26.923
+Pause the video and write it on
+paper.
+
+00:09:48.075 --> 00:09:52.384
+Question two, XML and Java:
+write the row layout,
+
+00:09:52.504 --> 00:09:55.827
+then wire the RecyclerView as a
+two-column grid.
+
+00:10:16.950 --> 00:10:18.641
+Answer one.
+
+00:10:18.761 --> 00:10:23.755
+TODO one: findViewById on
+itemView, for both TextViews.
+
+00:10:23.875 --> 00:10:27.948
+TODO two: inflate item_product
+with parent and false,
+
+00:10:28.068 --> 00:10:30.748
+and return a new
+ProductViewHolder.
+
+00:10:30.868 --> 00:10:34.899
+TODO three: cast the holder, get
+the product at position,
+
+00:10:35.019 --> 00:10:37.999
+set the name, and set the price
+as a String.
+
+00:10:38.119 --> 00:10:40.221
+setText needs text.
+
+00:10:40.341 --> 00:10:44.008
+A bare int is treated as a
+resource id and crashes.
+
+00:10:44.128 --> 00:10:47.538
+TODO four: return productData
+dot size.
+
+00:10:48.700 --> 00:10:50.378
+Answer two.
+
+00:10:50.498 --> 00:10:53.651
+The root LinearLayout:
+match_parent width,
+
+00:10:53.771 --> 00:10:56.472
+wrap_content height, horizontal.
+
+00:10:56.592 --> 00:10:59.851
+The name: width zero dp and
+weight one,
+
+00:10:59.971 --> 00:11:02.330
+so it takes the space left over.
+
+00:11:02.450 --> 00:11:04.746
+The price: wrap_content.
+
+00:11:04.866 --> 00:11:07.010
+Then find rvProducts,
+
+00:11:07.130 --> 00:11:10.153
+set a GridLayoutManager with
+this and two,
+
+00:11:10.273 --> 00:11:12.569
+and set a new ProductAdapter.
+
+00:11:13.700 --> 00:11:16.701
+Both answers were built and run
+on the emulator:
+
+00:11:16.821 --> 00:11:20.936
+a two-column grid of products.
+Mark yourself.
+
+00:11:22.075 --> 00:11:23.899
+That's RecyclerView.
+
+00:11:24.019 --> 00:11:27.362
+Open the project in Android
+Studio, run it,
+
+00:11:27.482 --> 00:11:30.377
+and break it on purpose, the way
+we did.
+
+00:11:30.497 --> 00:11:33.263
+Then send me photos of your two
+answers,
+
+00:11:33.383 --> 00:11:35.527
+and I'll mark them line by line.
+
+00:11:35.647 --> 00:11:40.192
+Next lesson: Fragments,
+DialogFragment and the manifest.
+
+00:11:40.312 --> 00:11:42.263
+You've got this, Shivaar.

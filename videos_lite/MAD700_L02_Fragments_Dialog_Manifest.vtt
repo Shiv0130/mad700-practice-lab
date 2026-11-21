@@ -1,0 +1,803 @@
+WEBVTT
+
+00:00:00.450 --> 00:00:03.859
+Shivaar, lesson
+two: pointer three.
+
+00:00:03.979 --> 00:00:07.724
+Fragments, the DialogFragment
+with a listener,
+
+00:00:07.844 --> 00:00:09.713
+and the manifest.
+
+00:00:09.833 --> 00:00:12.785
+Slides first, then
+the whiteboard,
+
+00:00:12.905 --> 00:00:15.498
+then a real app on the emulator.
+
+00:00:15.618 --> 00:00:18.115
+Then four classic mistakes,
+
+00:00:18.235 --> 00:00:21.836
+and two TODO questions on
+your Smart Pantry app.
+
+00:00:22.992 --> 00:00:25.920
+Slide three: what is a Fragment?
+
+00:00:26.040 --> 00:00:27.985
+It's a piece of a screen,
+
+00:00:28.105 --> 00:00:31.394
+with its own layout and
+its own Java class.
+
+00:00:31.514 --> 00:00:33.382
+It can't live alone.
+
+00:00:33.502 --> 00:00:36.383
+It always sits
+inside an Activity,
+
+00:00:36.503 --> 00:00:40.248
+and you can reuse the same
+piece on different screens.
+
+00:00:41.408 --> 00:00:43.617
+Slide four compares them.
+
+00:00:43.737 --> 00:00:48.058
+An Activity is a whole screen
+and calls setContentView.
+
+00:00:48.178 --> 00:00:51.035
+A Fragment needs
+a host Activity,
+
+00:00:51.155 --> 00:00:54.924
+and it inflates its own
+XML into a container.
+
+00:00:55.044 --> 00:00:58.812
+Page one hundred and nine of
+the study guide lists the
+
+00:00:58.932 --> 00:01:02.245
+DialogFragment as one
+kind of Fragment.
+
+00:01:03.367 --> 00:01:06.583
+Slide five: the
+tethered life cycle.
+
+00:01:06.703 --> 00:01:10.496
+onAttach: the fragment
+is joined to its host.
+
+00:01:10.616 --> 00:01:13.593
+onCreate: the object is made.
+
+00:01:13.713 --> 00:01:18.010
+onCreateView: it builds its
+layout and returns a View.
+
+00:01:18.130 --> 00:01:20.843
+onResume: it is on screen.
+
+00:01:20.963 --> 00:01:23.891
+It can never move
+further than its host.
+
+00:01:25.033 --> 00:01:28.394
+The study guide, page
+one hundred and ten:
+
+00:01:28.514 --> 00:01:32.931
+onCreateView inflates the layout
+with container and false,
+
+00:01:33.051 --> 00:01:34.929
+and returns the View.
+
+00:01:35.049 --> 00:01:37.978
+Slide seven shows
+the same lines.
+
+00:01:38.098 --> 00:01:40.114
+And note this sentence:
+
+00:01:40.234 --> 00:01:44.051
+fragments don't need to be
+registered in your manifest.
+
+00:01:45.200 --> 00:01:48.585
+Slide nine: fragment
+transactions.
+
+00:01:48.705 --> 00:01:51.514
+The FragmentManager
+is in charge.
+
+00:01:51.634 --> 00:01:54.418
+beginTransaction starts a batch.
+
+00:01:54.538 --> 00:01:57.851
+replace puts a new fragment
+into the container.
+
+00:01:57.971 --> 00:02:00.852
+addToBackStack
+lets Back undo it.
+
+00:02:00.972 --> 00:02:02.941
+And commit applies it.
+
+00:02:03.061 --> 00:02:05.918
+Without commit, nothing happens.
+
+00:02:07.075 --> 00:02:08.942
+Whiteboard.
+
+00:02:09.392 --> 00:02:13.352
+Step one: the host's
+layout, activity_main.
+
+00:02:13.802 --> 00:02:18.315
+Then the empty FrameLayout,
+with the id fragmentContainer.
+
+00:02:18.765 --> 00:02:21.094
+It's an empty frame on the wall.
+
+00:02:21.544 --> 00:02:24.401
+Height zero dp with weight one,
+
+00:02:24.851 --> 00:02:27.660
+so it takes all the
+space that's left.
+
+00:02:29.117 --> 00:02:33.413
+Step two: MainActivity puts
+the first fragment in.
+
+00:02:33.863 --> 00:02:38.424
+super, then setContentView,
+so the container exists.
+
+00:02:38.874 --> 00:02:42.787
+If savedInstanceState is
+null, it's the first start,
+
+00:02:43.237 --> 00:02:45.374
+as in your CA test.
+
+00:02:45.824 --> 00:02:49.953
+Then getSupportFragmentManager
+dot beginTransaction.
+
+00:02:50.403 --> 00:02:56.062
+Replace the container with a
+new HomeFragment. Then commit.
+
+00:02:56.512 --> 00:03:01.241
+After a rotation, Android puts
+the fragment back by itself.
+
+00:03:02.700 --> 00:03:05.413
+Step three: HomeFragment.
+
+00:03:05.863 --> 00:03:09.512
+It extends Fragment, with
+an empty constructor.
+
+00:03:09.962 --> 00:03:13.106
+onCreateView inflates
+fragment_home,
+
+00:03:13.556 --> 00:03:15.837
+with container and false.
+
+00:03:16.287 --> 00:03:18.424
+Find the button on view,
+
+00:03:18.874 --> 00:03:22.331
+because a fragment has
+no setContentView.
+
+00:03:22.781 --> 00:03:27.582
+On a tap: getParentFragmentManager,
+beginTransaction,
+
+00:03:28.032 --> 00:03:32.544
+replace with ProfileFragment,
+addToBackStack, commit.
+
+00:03:32.994 --> 00:03:34.863
+And return the view.
+
+00:03:36.325 --> 00:03:38.582
+Here it is on the emulator.
+
+00:03:38.702 --> 00:03:42.495
+HomeFragment, in green,
+sits in the container.
+
+00:03:42.615 --> 00:03:46.167
+Go to Profile swaps
+in ProfileFragment.
+
+00:03:46.287 --> 00:03:50.152
+Back brings Home back,
+thanks to addToBackStack.
+
+00:03:50.272 --> 00:03:55.793
+The real log: onAttach, onCreate,
+onCreateView, onResume.
+
+00:03:55.913 --> 00:04:00.378
+After Back, only onCreateView
+and onResume run again:
+
+00:04:00.498 --> 00:04:03.979
+the view was rebuilt,
+the object was kept.
+
+00:04:05.117 --> 00:04:07.157
+The DialogFragment.
+
+00:04:07.277 --> 00:04:11.262
+Slide four of Modular
+Android UI and State.
+
+00:04:11.382 --> 00:04:15.751
+Three stages: inflate its
+layout in onCreateView,
+
+00:04:15.871 --> 00:04:18.752
+listen for the
+button, and dismiss.
+
+00:04:18.872 --> 00:04:22.881
+getDialog dot dismiss
+must run on every path,
+
+00:04:23.001 --> 00:04:25.857
+or the dialog stays
+stuck on screen.
+
+00:04:26.992 --> 00:04:30.088
+How does the answer get
+back to the Activity?
+
+00:04:30.208 --> 00:04:32.873
+Slide six: four steps.
+
+00:04:32.993 --> 00:04:35.850
+The dialog defines an interface.
+
+00:04:35.970 --> 00:04:38.491
+The Activity implements it.
+
+00:04:38.611 --> 00:04:40.652
+The dialog calls it.
+
+00:04:40.772 --> 00:04:43.364
+The Activity uses the value.
+
+00:04:43.484 --> 00:04:47.157
+The dialog never needs to
+know which Activity it is.
+
+00:04:48.283 --> 00:04:52.748
+Study guide Listing four
+point ten, page sixty-seven:
+
+00:04:52.868 --> 00:04:55.029
+the date picker dialog.
+
+00:04:55.149 --> 00:05:00.310
+SaveDateListener interface,
+empty constructor, and saveItem:
+
+00:05:00.430 --> 00:05:03.142
+call the listener, then dismiss.
+
+00:05:04.283 --> 00:05:07.140
+Our version: QuantityDialog.
+
+00:05:07.590 --> 00:05:10.327
+It extends DialogFragment.
+
+00:05:10.777 --> 00:05:14.786
+Inside it, the interface
+SaveQuantityListener,
+
+00:05:15.236 --> 00:05:19.940
+with one method,
+didFinishQuantityDialog, taking an int.
+
+00:05:20.390 --> 00:05:24.303
+A field to hold the listener,
+and the empty constructor.
+
+00:05:24.753 --> 00:05:28.210
+In onAttach, the
+context is the host.
+
+00:05:28.660 --> 00:05:31.469
+Cast it to the
+listener and keep it.
+
+00:05:31.919 --> 00:05:38.269
+Study guide page one hundred and
+eleven puts this in onAttach.
+
+00:05:38.719 --> 00:05:44.897
+Its listing casts getActivity
+in saveItem. Both work.
+
+00:05:46.367 --> 00:05:50.735
+onCreateView inflates
+dialog_quantity, with false,
+
+00:05:51.185 --> 00:05:54.954
+and finds the EditText and
+the Save button on view.
+
+00:05:55.404 --> 00:05:57.973
+On Save, read the text.
+
+00:05:58.423 --> 00:06:01.016
+An empty box counts as zero.
+
+00:06:01.466 --> 00:06:03.507
+Then call saveItem.
+
+00:06:03.957 --> 00:06:07.245
+saveItem calls the host
+through the listener,
+
+00:06:07.695 --> 00:06:10.360
+then getDialog dot dismiss.
+
+00:06:10.810 --> 00:06:12.971
+Cancel dismisses too.
+
+00:06:13.421 --> 00:06:16.134
+Every path closes the dialog.
+
+00:06:17.617 --> 00:06:19.478
+The host side.
+
+00:06:19.928 --> 00:06:26.475
+MainActivity implements QuantityDialog
+dot SaveQuantityListener.
+
+00:06:26.925 --> 00:06:28.795
+That's the promise.
+
+00:06:29.245 --> 00:06:33.206
+On the button: new
+QuantityDialog, then show,
+
+00:06:33.656 --> 00:06:37.089
+with getSupportFragme
+ntManager and a tag.
+
+00:06:37.539 --> 00:06:40.179
+That's Listing
+four point eleven.
+
+00:06:40.629 --> 00:06:47.002
+And didFinishQuantityDialog puts
+the number on screen, as text.
+
+00:06:48.492 --> 00:06:51.756
+One more way, labelled
+general Android,
+
+00:06:52.206 --> 00:06:54.607
+not the study guide's listing.
+
+00:06:55.057 --> 00:06:57.338
+Instead of onCreateView,
+
+00:06:57.788 --> 00:07:04.810
+override onCreateDialog and return
+an AlertDialog dot Builder.
+
+00:07:05.260 --> 00:07:09.077
+Title, message, and
+setPositiveButton,
+
+00:07:09.527 --> 00:07:12.864
+whose click calls the
+host's didConfirmClear.
+
+00:07:13.314 --> 00:07:16.675
+These buttons close
+the dialog themselves.
+
+00:07:18.158 --> 00:07:22.719
+This is the real project file,
+in Android Studio's folders.
+
+00:07:22.839 --> 00:07:25.024
+Every line has a comment,
+
+00:07:25.144 --> 00:07:28.217
+so you can revise from
+it on your laptop.
+
+00:07:29.367 --> 00:07:33.543
+On the emulator: Set
+quantity opens our dialog.
+
+00:07:33.663 --> 00:07:36.160
+I type four and tap Save.
+
+00:07:36.280 --> 00:07:40.673
+The Activity shows Quantity
+four, and the dialog is gone.
+
+00:07:40.793 --> 00:07:44.082
+Clear quantity opens
+the AlertDialog.
+
+00:07:44.202 --> 00:07:46.771
+Clear, and it's back to zero.
+
+00:07:47.908 --> 00:07:49.778
+The manifest.
+
+00:07:49.898 --> 00:07:54.195
+Slide four of Android App
+Blueprints: it's the guest list.
+
+00:07:54.315 --> 00:07:58.275
+Every Activity must be
+listed inside application.
+
+00:07:58.395 --> 00:08:02.164
+If one is missing, the app
+crashes when you open it.
+
+00:08:02.284 --> 00:08:05.429
+Fragments and dialogs
+are not listed.
+
+00:08:06.575 --> 00:08:08.443
+The front door.
+
+00:08:08.563 --> 00:08:12.812
+The study guide, page thirty-
+three, and slide five.
+
+00:08:12.932 --> 00:08:18.687
+The intent-filter tells the OS
+what to do with this Activity.
+
+00:08:18.807 --> 00:08:21.664
+Action MAIN: it's
+the first screen.
+
+00:08:21.784 --> 00:08:24.833
+Category LAUNCHER:
+give it an icon.
+
+00:08:24.953 --> 00:08:28.242
+Exported true lets the
+launcher start it.
+
+00:08:28.362 --> 00:08:32.826
+That's required on Android
+twelve and up: general Android.
+
+00:08:33.950 --> 00:08:36.399
+Slide eight: versions.
+
+00:08:36.519 --> 00:08:40.528
+versionCode is an integer
+that goes up every release.
+
+00:08:40.648 --> 00:08:42.928
+The Play Store compares it.
+
+00:08:43.048 --> 00:08:46.289
+versionName is the
+text the user sees.
+
+00:08:46.409 --> 00:08:49.386
+The study guide,
+page thirty-four,
+
+00:08:49.506 --> 00:08:52.099
+puts both in build dot gradle.
+
+00:08:52.219 --> 00:08:57.092
+Permissions, like INTERNET, go
+in the manifest: slide nine.
+
+00:08:58.242 --> 00:09:00.978
+The manifest, line by line.
+
+00:09:01.428 --> 00:09:04.813
+uses-permission
+INTERNET, an example.
+
+00:09:05.263 --> 00:09:09.584
+application, with the label
+under the icon, and the theme.
+
+00:09:10.034 --> 00:09:13.227
+activity, name dot MainActivity.
+
+00:09:13.677 --> 00:09:18.588
+The dot means this app's
+package. Exported true.
+
+00:09:19.038 --> 00:09:23.311
+The intent-filter: action
+MAIN, category LAUNCHER.
+
+00:09:23.761 --> 00:09:25.945
+And no fragments anywhere.
+
+00:09:27.408 --> 00:09:32.185
+And build dot gradle, module
+app, inside defaultConfig.
+
+00:09:32.635 --> 00:09:35.420
+versionCode two, an integer.
+
+00:09:35.870 --> 00:09:39.087
+versionName one
+point one, a string.
+
+00:09:40.575 --> 00:09:42.832
+Gradle builds it for real.
+
+00:09:42.952 --> 00:09:46.745
+adb installs it, and
+starts MainActivity.
+
+00:09:46.865 --> 00:09:51.065
+dumpsys reads the installed
+app: versionCode two,
+
+00:09:51.185 --> 00:09:55.530
+versionName one point one,
+straight from build dot gradle.
+
+00:09:56.658 --> 00:10:00.571
+Mistake one: the launcher
+intent-filter is missing.
+
+00:10:00.691 --> 00:10:03.260
+It builds, and it installs.
+
+00:10:03.380 --> 00:10:07.005
+But the app drawer has no
+Pantry Fragments icon.
+
+00:10:07.125 --> 00:10:11.206
+The launcher test says: no
+activities found to run.
+
+00:10:12.367 --> 00:10:17.912
+The fix: put MAIN and LAUNCHER
+back. Rebuild, reinstall.
+
+00:10:18.032 --> 00:10:21.465
+The icon is there, and
+a tap starts the app.
+
+00:10:22.617 --> 00:10:24.481
+Mistake two:
+
+00:10:24.601 --> 00:10:28.970
+MainActivity forgets to
+implement SaveQuantityListener.
+
+00:10:29.090 --> 00:10:30.963
+It still compiles.
+
+00:10:31.083 --> 00:10:37.301
+Tap Set quantity, and it crashes.
+Logcat: ClassCastException,
+
+00:10:37.421 --> 00:10:41.717
+MainActivity cannot be cast
+to SaveQuantityListener.
+
+00:10:42.867 --> 00:10:45.700
+The fix: add it to implements.
+
+00:10:45.820 --> 00:10:50.212
+Rerun, type seven,
+Save: Quantity seven.
+
+00:10:51.367 --> 00:10:54.440
+Mistake three:
+commit is forgotten.
+
+00:10:54.560 --> 00:10:56.792
+No error, no crash.
+
+00:10:56.912 --> 00:10:59.265
+The container is just empty.
+
+00:10:59.385 --> 00:11:01.251
+The sneaky one.
+
+00:11:02.408 --> 00:11:06.417
+Add commit, rebuild, and
+HomeFragment is back.
+
+00:11:07.575 --> 00:11:10.552
+Mistake four: inflate with true.
+
+00:11:10.672 --> 00:11:12.929
+The app crashes on launch.
+
+00:11:13.049 --> 00:11:17.369
+Logcat: the specified child
+already has a parent.
+
+00:11:17.489 --> 00:11:21.138
+With true, the view is
+added to the container now,
+
+00:11:21.258 --> 00:11:24.115
+and the FragmentManager
+adds it again.
+
+00:11:25.242 --> 00:11:27.307
+The fix: false.
+
+00:11:27.427 --> 00:11:30.499
+Rebuild, rerun, and it works.
+
+00:11:31.658 --> 00:11:33.523
+Key takeaways.
+
+00:11:33.643 --> 00:11:35.516
+Pause and copy them.
+
+00:11:35.636 --> 00:11:38.348
+Fragment: a piece of a screen.
+
+00:11:38.468 --> 00:11:41.493
+Inflate with false,
+return the view.
+
+00:11:41.613 --> 00:11:45.166
+beginTransaction,
+replace, commit.
+
+00:11:45.286 --> 00:11:52.244
+Dialog: interface, cast in onAttach,
+call the listener, dismiss.
+
+00:11:52.364 --> 00:11:55.245
+The host implements
+it and calls show.
+
+00:11:55.365 --> 00:12:00.502
+Manifest: every Activity, MAIN
+and LAUNCHER, no fragments.
+
+00:12:00.622 --> 00:12:03.310
+Versions in build dot gradle.
+
+00:12:04.450 --> 00:12:06.318
+Your turn.
+
+00:12:06.438 --> 00:12:10.519
+Question one, Java, on
+your Smart Pantry app:
+
+00:12:10.639 --> 00:12:15.484
+a ServingsDialog and
+its host. Seven TODOs.
+
+00:12:15.604 --> 00:12:18.509
+Pause the video and
+write it on paper.
+
+00:12:39.658 --> 00:12:44.699
+Question two, XML: complete
+Smart Pantry's manifest,
+
+00:12:44.819 --> 00:12:48.684
+with its five Activities,
+and the two version lines.
+
+00:13:09.825 --> 00:13:11.218
+Answer one.
+
+00:13:11.338 --> 00:13:14.819
+TODO one: extends
+DialogFragment.
+
+00:13:14.939 --> 00:13:18.611
+TODO two: the
+ServingsListener interface.
+
+00:13:18.731 --> 00:13:21.372
+TODO three: in onAttach,
+
+00:13:21.492 --> 00:13:24.637
+cast the context to
+ServingsListener.
+
+00:13:24.757 --> 00:13:29.654
+TODO four: inflate dialog_servings
+with container and false.
+
+00:13:29.774 --> 00:13:36.563
+TODO five: call the listener, then
+getDialog dot dismiss. TODO six:
+
+00:13:36.683 --> 00:13:41.268
+the Activity implements
+ServingsDialog dot ServingsListener.
+
+00:13:41.388 --> 00:13:45.444
+TODO seven: show, with
+the manager and the tag.
+
+00:13:46.575 --> 00:13:48.445
+Answer two.
+
+00:13:48.565 --> 00:13:51.638
+MainActivity, exported true,
+
+00:13:51.758 --> 00:13:54.879
+with the MAIN and
+LAUNCHER intent-filter.
+
+00:13:54.999 --> 00:13:58.935
+The other four Activities,
+each exported false:
+
+00:13:59.055 --> 00:14:01.120
+only your app opens them.
+
+00:14:01.240 --> 00:14:05.729
+TODO four: versionCode two and
+versionName one point one,
+
+00:14:05.849 --> 00:14:09.306
+in build dot gradle,
+not in the manifest.
+
+00:14:10.450 --> 00:14:14.531
+Both answers, in a real
+project, on the emulator.
+
+00:14:14.651 --> 00:14:18.660
+It starts through the launcher,
+so the intent-filter works.
+
+00:14:18.780 --> 00:14:26.146
+Open the recipe, change servings,
+four, OK: Serves four. Mark yourself.
+
+00:14:27.283 --> 00:14:31.028
+That's fragments, dialogs
+and the manifest.
+
+00:14:31.148 --> 00:14:35.253
+Open the project, run it,
+and break it on purpose.
+
+00:14:35.373 --> 00:14:41.807
+Send me photos of your two answers,
+and I'll mark them. Next: SQLite.
+
+00:14:41.927 --> 00:14:44.111
+You've got this, Shivaar.

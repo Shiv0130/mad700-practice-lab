@@ -1,0 +1,719 @@
+WEBVTT
+
+00:00:00.450 --> 00:00:05.338
+Shivaar, this is the MAD700 scope,
+rebuilt from zero.
+
+00:00:05.458 --> 00:00:09.358
+Mr Siyah's five pointers in order:
+whiteboard first,
+
+00:00:09.478 --> 00:00:12.480
+a comment on every line, then a
+real run.
+
+00:00:12.600 --> 00:00:15.731
+Then seven CA-style TODO
+questions.
+
+00:00:15.851 --> 00:00:17.802
+Have your exam pad ready.
+
+00:00:18.950 --> 00:00:20.641
+Pointer one.
+
+00:00:20.761 --> 00:00:24.213
+An Activity is the brain: one
+screen's Java.
+
+00:00:24.333 --> 00:00:27.377
+The layout is the face: the XML.
+
+00:00:27.497 --> 00:00:30.907
+An Intent is the messenger that
+opens another screen.
+
+00:00:31.027 --> 00:00:32.999
+A View is one widget.
+
+00:00:33.119 --> 00:00:35.348
+A ViewGroup arranges Views.
+
+00:00:35.468 --> 00:00:37.743
+match_parent fills the parent,
+
+00:00:37.863 --> 00:00:40.265
+wrap_content is just big enough.
+
+00:00:40.385 --> 00:00:43.407
+Padding is inside, margin is
+outside.
+
+00:00:43.527 --> 00:00:46.680
+dp for sizes, sp for text.
+
+00:00:47.825 --> 00:00:49.797
+onCreate runs first.
+
+00:00:49.917 --> 00:00:54.054
+Call super, then setContentView to
+load the XML.
+
+00:00:54.174 --> 00:00:58.032
+findViewById before that returns
+null and crashes.
+
+00:00:58.152 --> 00:01:00.318
+That bug was in the re-test.
+
+00:01:00.438 --> 00:01:03.076
+A click listener runs on every
+tap.
+
+00:01:03.196 --> 00:01:06.433
+An explicit Intent names the exact
+class.
+
+00:01:06.553 --> 00:01:10.584
+putExtra attaches data,
+startActivity opens it,
+
+00:01:10.704 --> 00:01:13.536
+and getIntExtra reads it with a
+default.
+
+00:01:14.658 --> 00:01:19.053
+Boundary value analysis, study
+guide page 203:
+
+00:01:19.173 --> 00:01:21.832
+find each limit and test each
+side.
+
+00:01:21.952 --> 00:01:26.582
+For one to ninety-nine: zero, one,
+two, ninety-eight,
+
+00:01:26.702 --> 00:01:28.998
+ninety-nine, one hundred.
+
+00:01:30.158 --> 00:01:33.568
+A real run: zero and one hundred
+are rejected,
+
+00:01:33.688 --> 00:01:35.380
+the rest accepted.
+
+00:01:35.500 --> 00:01:39.143
+Today's birthday is accepted,
+tomorrow's rejected.
+
+00:01:40.283 --> 00:01:41.974
+Pointer two.
+
+00:01:42.094 --> 00:01:46.167
+A RelativeLayout places children
+relative to the parent or
+
+00:01:46.287 --> 00:01:47.966
+other views.
+
+00:01:48.086 --> 00:01:51.003
+The study guide says
+alignParentLeft,
+
+00:01:51.123 --> 00:01:53.609
+the cheat sheet alignParentStart.
+
+00:01:53.729 --> 00:01:55.419
+Know both.
+
+00:01:55.539 --> 00:01:59.076
+The nested horizontal LinearLayout
+is the button bar,
+
+00:01:59.196 --> 00:02:00.858
+pinned to the bottom.
+
+00:02:00.978 --> 00:02:04.494
+Zero dp plus weight one shares the
+width equally.
+
+00:02:04.614 --> 00:02:07.037
+include pastes in another file.
+
+00:02:07.157 --> 00:02:08.848
+Its root is merge,
+
+00:02:08.968 --> 00:02:12.421
+so the Save button joins the bar
+with no extra layer.
+
+00:02:12.541 --> 00:02:15.027
+At plus id creates an id.
+
+00:02:15.147 --> 00:02:17.186
+At id refers to one.
+
+00:02:18.325 --> 00:02:21.992
+A real check of the actual files:
+all eleven parse,
+
+00:02:22.112 --> 00:02:24.599
+and the attributes are where we
+put them.
+
+00:02:25.742 --> 00:02:27.419
+Pointer three.
+
+00:02:27.539 --> 00:02:30.114
+The manifest is the app's
+passport.
+
+00:02:30.234 --> 00:02:32.657
+Every Activity must be listed,
+
+00:02:32.777 --> 00:02:35.351
+or the app crashes when it opens
+it.
+
+00:02:35.471 --> 00:02:39.417
+The launcher has the intent
+filter: MAIN, the first screen,
+
+00:02:39.537 --> 00:02:42.175
+and LAUNCHER, the app-drawer icon.
+
+00:02:42.295 --> 00:02:44.503
+Only one Activity gets it.
+
+00:02:44.623 --> 00:02:48.266
+Versions live in build dot gradle,
+defaultConfig.
+
+00:02:48.386 --> 00:02:51.430
+versionCode is an integer for the
+Play Store.
+
+00:02:51.550 --> 00:02:54.103
+versionName is text for the user.
+
+00:02:55.242 --> 00:02:57.407
+Now Fragments, slowly.
+
+00:02:57.527 --> 00:03:00.123
+The Activity is a frame on the
+wall,
+
+00:03:00.243 --> 00:03:02.623
+with an empty container inside.
+
+00:03:02.743 --> 00:03:06.411
+A Fragment is a removable picture
+that slots into that
+
+00:03:06.531 --> 00:03:08.221
+container.
+
+00:03:08.341 --> 00:03:11.021
+It has its own XML and Java,
+
+00:03:11.141 --> 00:03:13.907
+but it always lives inside an
+Activity.
+
+00:03:14.027 --> 00:03:18.506
+The FragmentManager swaps them:
+begin, replace, commit.
+
+00:03:18.626 --> 00:03:20.812
+No commit, no change.
+
+00:03:20.932 --> 00:03:25.133
+onCreateView inflates the
+Fragment's XML and must return
+
+00:03:25.253 --> 00:03:26.944
+that View.
+
+00:03:27.064 --> 00:03:29.850
+Fragments are light review on the
+pointers,
+
+00:03:29.970 --> 00:03:33.102
+but twenty-five marks in both CA
+papers.
+
+00:03:34.242 --> 00:03:37.285
+The host's layout is one empty
+FrameLayout.
+
+00:03:37.405 --> 00:03:41.094
+Load HomeFragment only if
+savedInstanceState is null,
+
+00:03:41.214 --> 00:03:42.905
+the first start.
+
+00:03:43.025 --> 00:03:46.026
+After rotation, Android restores
+it,
+
+00:03:46.146 --> 00:03:48.699
+so loading again makes a
+duplicate.
+
+00:03:48.819 --> 00:03:51.393
+onCreateView inflates with false,
+
+00:03:51.513 --> 00:03:54.300
+and finds the button on the
+inflated view.
+
+00:03:54.420 --> 00:03:57.058
+On a tap: replace with Profile,
+
+00:03:57.178 --> 00:04:00.330
+addToBackStack so Back returns,
+commit.
+
+00:04:00.450 --> 00:04:02.126
+Return the view.
+
+00:04:03.283 --> 00:04:05.964
+The model: Home, then Profile.
+
+00:04:06.084 --> 00:04:07.774
+Back brings Home.
+
+00:04:07.894 --> 00:04:11.604
+Back again, with nothing
+remembered, closes the screen.
+
+00:04:12.742 --> 00:04:16.022
+A DialogFragment is a Fragment
+that pops up.
+
+00:04:16.142 --> 00:04:19.764
+To send the answer back, it uses a
+listener interface:
+
+00:04:19.884 --> 00:04:22.028
+a phone line with one method.
+
+00:04:22.148 --> 00:04:24.399
+The Activity implements it.
+
+00:04:24.519 --> 00:04:27.372
+The dialog calls it, then
+dismisses.
+
+00:04:28.492 --> 00:04:31.772
+Study guide pages sixty-eight and
+sixty-nine.
+
+00:04:31.892 --> 00:04:34.808
+One: extends DialogFragment.
+
+00:04:34.928 --> 00:04:36.945
+Two: the interface.
+
+00:04:37.065 --> 00:04:39.446
+Three: an empty constructor.
+
+00:04:39.566 --> 00:04:42.419
+Four: inflate and find on the
+view.
+
+00:04:42.539 --> 00:04:45.219
+Five: OK calls saveItem.
+
+00:04:45.339 --> 00:04:49.540
+Six: parse the number, cast
+getActivity to the listener,
+
+00:04:49.660 --> 00:04:51.589
+call it, dismiss.
+
+00:04:51.709 --> 00:04:53.575
+The arrow is a lambda;
+
+00:04:53.695 --> 00:04:56.460
+the long OnClickListener form
+works too.
+
+00:04:57.617 --> 00:05:01.239
+The Activity implements the
+listener: that's the promise.
+
+00:05:01.359 --> 00:05:04.702
+show with the FragmentManager and
+a tag opens it.
+
+00:05:04.822 --> 00:05:07.996
+The dialog calls
+didFinishPortionDialog,
+
+00:05:08.116 --> 00:05:10.433
+and the Activity shows the number.
+
+00:05:11.575 --> 00:05:15.884
+The model: four typed, four
+received, dialog dismissed.
+
+00:05:16.004 --> 00:05:19.305
+And all the Android files in your
+code folder compile
+
+00:05:19.425 --> 00:05:21.676
+against stubs with no errors.
+
+00:05:21.796 --> 00:05:24.240
+That checks the code, not a phone.
+
+00:05:25.367 --> 00:05:27.044
+Pointer four.
+
+00:05:27.164 --> 00:05:30.295
+Four parts: RecyclerView, the
+glass.
+
+00:05:30.415 --> 00:05:32.496
+The Adapter, the engine.
+
+00:05:32.616 --> 00:05:34.739
+The ViewHolder, the cache.
+
+00:05:34.859 --> 00:05:37.346
+The LayoutManager stacks rows.
+
+00:05:37.466 --> 00:05:41.282
+The row height must be
+wrap_content, or you see one row.
+
+00:05:42.408 --> 00:05:45.346
+The ViewHolder finds the row's
+views once,
+
+00:05:45.466 --> 00:05:47.155
+which stops stutter.
+
+00:05:47.275 --> 00:05:51.475
+onCreateViewHolder inflates
+item_contact with parent and
+
+00:05:51.595 --> 00:05:53.273
+false.
+
+00:05:53.393 --> 00:05:56.545
+onBindViewHolder fills the row at
+position.
+
+00:05:56.665 --> 00:05:59.924
+getItemCount returns size, not
+length.
+
+00:06:01.075 --> 00:06:05.857
+Wiring: find it, set a
+LinearLayoutManager, set the Adapter,
+
+00:06:05.977 --> 00:06:08.442
+in onResume so it refreshes.
+
+00:06:08.562 --> 00:06:10.964
+Grid: GridLayoutManager.
+
+00:06:11.084 --> 00:06:15.263
+After a delete: remove, then
+notifyDataSetChanged.
+
+00:06:16.408 --> 00:06:19.709
+The model: count three, bind three
+rows.
+
+00:06:19.829 --> 00:06:23.367
+Remove Ben, notify, and two rows
+are bound.
+
+00:06:24.492 --> 00:06:26.182
+Pointer five.
+
+00:06:26.302 --> 00:06:29.455
+The helper extends
+SQLiteOpenHelper.
+
+00:06:29.575 --> 00:06:33.690
+super takes the context, the name,
+null and the version.
+
+00:06:33.810 --> 00:06:36.663
+onCreate runs CREATE TABLE once.
+
+00:06:36.783 --> 00:06:39.270
+Spell AUTOINCREMENT exactly.
+
+00:06:39.390 --> 00:06:43.184
+Raise the version and onUpgrade
+runs: drop the table,
+
+00:06:43.304 --> 00:06:45.322
+then onCreate of db.
+
+00:06:46.450 --> 00:06:50.093
+Insert: ContentValues, column then
+value.
+
+00:06:50.213 --> 00:06:53.602
+insert returns the row id, or
+minus one.
+
+00:06:53.722 --> 00:06:57.602
+Reading: moveToFirst, loop while
+not isAfterLast,
+
+00:06:57.722 --> 00:07:02.052
+read by column index, add,
+moveToNext, then close.
+
+00:07:02.172 --> 00:07:04.959
+Forget moveToNext and it never
+ends.
+
+00:07:05.079 --> 00:07:08.552
+For a search, use a question mark
+and a String array.
+
+00:07:09.700 --> 00:07:13.816
+The same SQL in real SQLite: new
+row ids,
+
+00:07:13.936 --> 00:07:17.924
+the question-mark search finds
+Ben, delete removes one row,
+
+00:07:18.044 --> 00:07:21.154
+and a nameless row is refused by
+NOT NULL.
+
+00:07:22.283 --> 00:07:24.449
+Your sources disagree here.
+
+00:07:24.569 --> 00:07:27.122
+Weight: write zero dp.
+
+00:07:27.242 --> 00:07:31.551
+Insert: minus one and greater than
+zero both mean success.
+
+00:07:31.671 --> 00:07:34.437
+Key column: use the skeleton's
+name.
+
+00:07:34.557 --> 00:07:36.553
+Versions: Gradle.
+
+00:07:36.673 --> 00:07:40.682
+And the study guide's chapter
+three MCQ one key is wrong.
+
+00:07:41.825 --> 00:07:43.499
+Key takeaways.
+
+00:07:43.619 --> 00:07:45.299
+Pause and copy them.
+
+00:07:45.419 --> 00:07:47.585
+setContentView first.
+
+00:07:47.705 --> 00:07:49.613
+Each side of each limit.
+
+00:07:49.733 --> 00:07:52.241
+Every Activity in the manifest.
+
+00:07:52.361 --> 00:07:54.784
+onCreateView returns the view.
+
+00:07:54.904 --> 00:07:56.900
+A listener plus dismiss.
+
+00:07:57.020 --> 00:07:59.316
+Four roles, three methods.
+
+00:07:59.436 --> 00:08:03.851
+AUTOINCREMENT, question marks,
+moveToNext, close.
+
+00:08:04.992 --> 00:08:09.171
+Your turn: seven CA-style
+questions, easy to hard,
+
+00:08:09.291 --> 00:08:10.983
+with a countdown.
+
+00:08:11.103 --> 00:08:13.032
+Pause longer if you need.
+
+00:08:13.152 --> 00:08:17.140
+Question one, easy: explain the
+crash, fix it,
+
+00:08:17.260 --> 00:08:20.670
+read ITEM_COUNT with default zero,
+and show it.
+
+00:08:33.825 --> 00:08:35.885
+Question two, easy:
+
+00:08:36.005 --> 00:08:39.136
+the quantity rule and its six
+boundary values.
+
+00:08:52.283 --> 00:08:57.192
+Question three, medium, the real
+CA question: orientation,
+
+00:08:57.312 --> 00:09:00.422
+email, password, and the login
+button.
+
+00:09:13.575 --> 00:09:17.327
+Question four, medium: the three
+Adapter methods.
+
+00:09:30.450 --> 00:09:34.566
+Question five, hard: the custom
+dialog with its listener.
+
+00:09:47.700 --> 00:09:52.288
+Question six, hard, from the re-
+test: CREATE TABLE member,
+
+00:09:52.408 --> 00:09:54.098
+then the Cursor loop.
+
+00:10:07.242 --> 00:10:11.378
+Question seven, hard, from the CA:
+load once,
+
+00:10:11.498 --> 00:10:13.470
+then navigate with Back.
+
+00:10:26.617 --> 00:10:28.308
+Answer one.
+
+00:10:28.428 --> 00:10:32.522
+findViewById before setContentView
+returned null.
+
+00:10:32.642 --> 00:10:34.324
+Swap them.
+
+00:10:34.444 --> 00:10:37.766
+Then getIntExtra with zero, and
+setText.
+
+00:10:38.908 --> 00:10:40.600
+Answer two.
+
+00:10:40.720 --> 00:10:44.279
+Greater-or-equal one, less-or-
+equal ninety-nine.
+
+00:10:44.399 --> 00:10:48.366
+Zero and one hundred rejected, the
+other four accepted.
+
+00:10:49.492 --> 00:10:51.742
+Answer three, from the memo.
+
+00:10:51.862 --> 00:10:53.534
+Vertical.
+
+00:10:53.654 --> 00:10:57.555
+textEmailAddress, textPassword,
+not password.
+
+00:10:57.675 --> 00:11:00.013
+The button has ems ten.
+
+00:11:01.158 --> 00:11:02.850
+Answer four.
+
+00:11:02.970 --> 00:11:06.571
+Inflate with parent and false,
+return a ViewHolder.
+
+00:11:06.691 --> 00:11:08.815
+Bind getName at position.
+
+00:11:08.935 --> 00:11:10.625
+Return size.
+
+00:11:11.783 --> 00:11:13.475
+Answer five.
+
+00:11:13.595 --> 00:11:17.689
+extends DialogFragment, the
+interface, inflate,
+
+00:11:17.809 --> 00:11:20.874
+find on the view, OK calls
+saveItem.
+
+00:11:20.994 --> 00:11:25.174
+Then parse, cast getActivity,
+call, dismiss.
+
+00:11:26.325 --> 00:11:28.017
+Answer six.
+
+00:11:28.137 --> 00:11:31.653
+id INTEGER PRIMARY KEY
+AUTOINCREMENT,
+
+00:11:31.773 --> 00:11:35.997
+name and plan NOT NULL, monthlyFee
+REAL, joinYear INTEGER.
+
+00:11:36.117 --> 00:11:39.718
+Then the memo's loop: rawQuery
+with a question mark,
+
+00:11:39.838 --> 00:11:43.333
+while moveToNext, getString zero,
+close.
+
+00:11:44.492 --> 00:11:46.766
+Answer seven, from the memo.
+
+00:11:46.886 --> 00:11:50.381
+If savedInstanceState is null,
+replace and commit.
+
+00:11:50.501 --> 00:11:52.797
+Inflate, find on the view.
+
+00:11:52.917 --> 00:11:56.884
+On tap: replace, addToBackStack
+null, commit.
+
+00:11:57.004 --> 00:11:58.679
+Return the view.
+
+00:11:59.825 --> 00:12:01.516
+Mark yourself,
+
+00:12:01.636 --> 00:12:05.367
+then send me photos of your exam
+pad and I'll mark them line
+
+00:12:05.487 --> 00:12:07.168
+by line.
+
+00:12:07.288 --> 00:12:10.677
+The code folder's README says
+where each file goes.
+
+00:12:10.797 --> 00:12:12.748
+You've got this, Shivaar.
