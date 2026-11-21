@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#04aa6d">
+<title>MAD700 Practice Lab</title>
+<link rel="icon" href="data:,">
+<script>try{var t=localStorage.getItem("mad700lab.theme");if(/^(dark|dracula|futuristic|solarized|contrast)$/.test(t)){var d=document.documentElement;d.setAttribute("data-theme",t);d.style.backgroundColor={dark:"#0f141a",dracula:"#21222c",futuristic:"#05060d",solarized:"#eee8d5",contrast:"#000000"}[t]}}catch(e){}</script>
+<link rel="stylesheet" href="app.css">
+</head><body>
+<header id="top">
+  <button id="menuBtn" aria-label="Open topics menu">☰</button>
+  <a href="#/" class="brand">MAD700 <span>Practice Lab</span></a>
+  <div class="chips"><span id="mockChip" class="chip warn" style="display:none"></span><span id="xpChip" class="chip" title="XP">⭐ 0</span><span id="streakChip" class="chip" title="Streak">🔥 0</span></div>
+</header>
+<div id="scrim"></div>
+<nav id="nav"></nav>
+<main id="main"><p class="muted" style="padding:20px">Loading…</p></main>
+<script src="content.js"></script>
+<script src="app.js"></script>
+</body></html>
