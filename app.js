@@ -101,7 +101,7 @@ function nav() {
   s += "<h6>Flow through the lecturer's questions</h6>" + link("#/flow", "🌊 Flow mode", flowTick()) + link("#/map", "🗺 Pointer map") + link("#/cheat", "🧾 Cheatsheet (print)");
   s += "<h6>Exam pointers</h6>";
   for (const x of D.secs) { const st = secStats(x.id); s += link("#/s/" + x.id, esc(x.short), `${st.exDone}/${st.ex}`); }
-  s += "<h6>Practise</h6>" + link("#/quiz/ALL", "🧠 Mixed quiz") + link("#/cards/ALL", "🃏 Keycards") + link("#/fill", "✏️ Fill-ins (practice only)") + link("#/videos", "🎬 My lesson videos") + link("#/reels", "📱 Reels feed") + link("#/mock", "⏱ Timed mock (3 h)");
+  s += "<h6>Practise</h6>" + link("#/quiz/ALL", "🧠 Mixed quiz") + link("#/cards/ALL", "🃏 Keycards") + link("#/fill", "✏️ Fill-ins (practice only)") + link("#/videos", "🎬 My lesson videos") + link("#/study", "📓 NotebookLM + Vaia") + link("#/reels", "📱 Reels feed") + link("#/mock", "⏱ Timed mock (3 h)");
   s += "<h6>You</h6>" + link("#/settings", "⚙️ Themes, sync, export");
   $("#nav").innerHTML = s;
 }
@@ -154,7 +154,7 @@ function secPage(sid, tab) {
   }).join("");
   if (tab === "quiz") body = `<p><a class="btn" href="#/quiz/${sid}">Start the ${esc(x.short)} quiz (${D.quiz.filter(q => q.sec === sid).length} questions)</a></p>`;
   if (tab === "cards") body = `<p><a class="btn" href="#/cards/${sid}">Flip the ${D.cards.filter(c => c.sec === sid).length} keycards</a></p>`;
-  if (tab === "videos") { body = lessonVideosHTML(sid) + "<h3>Reels for this pointer</h3>" + reelsHTML(sid); }
+  if (tab === "videos") { body = lessonVideosHTML(sid) + studyCard(sid) + "<h3>Reels for this pointer</h3>" + reelsHTML(sid); }
   if (tab === "map") body = pointerSection(sid);
   return `<h2>${esc(x.title)}</h2><p class="muted">${esc(x.pointer)}</p><div class="tabs">${t("lesson", "📖 Lesson")}${t("code", "💻 // TODO code")}${t("quiz", "🧠 Quiz")}${t("cards", "🃏 Cards")}${t("map", "🗺 Map")}${t("videos", "🎬 Videos")}</div>${body}`;
 }
@@ -543,21 +543,51 @@ ROUTES.flow = () => {
 };
 
 /* ---------- lesson videos, reels ---------- */
+const vbase = f => f.split("/").pop();
+const liteSrc = v => "videos_lite/" + vbase(v.file) + ".b64";
+const liteVtt = v => v.vtt ? "videos_lite/" + vbase(v.vtt) : "";
 function lessonVideosHTML(sid) {
   let h = "";
   D.local_videos.forEach((v, idx) => {
     const chs = (v.chapters || []).filter(c => !sid || c.ptr === sid);
-    if (sid && !chs.length) return;
-    h += `<div class="card vcard"><b>${esc(v.title)}</b>
+    if (sid && !chs.length && !(v.ptrs || []).includes(sid)) return;
+    h += `<div class="card vcard" data-vi="${idx}"><b>${esc(v.title)}</b>
       <video controls preload="none" playsinline style="width:100%;border-radius:10px;margin-top:6px;background:#000" src="${esc(v.file)}">${v.vtt ? `<track kind="subtitles" src="${esc(v.vtt)}" srclang="en" label="English" default>` : ""}</video>
-      <div class="vmiss note" style="display:none">This video file isn't in the hosted copy (it is large). It's in <b>mad700_lab_videos.zip</b>: unzip it next to index.html so the <code>videos/</code> folder sits beside it.</div>
+      <div class="vmiss note" style="display:none">The full-quality video isn't in the hosted copy (the host cannot take big files). <button class="btn sm vlite">▶ Play the hosted lite copy (small, 854p)</button> or, for full quality offline, unzip <b>mad700_lab_videos_v2.zip</b> next to index.html so the <code>videos/</code> folder sits beside it.<span class="vstat src"></span></div>
       ${chs.length ? `<div class="chap"><b>Chapters${sid ? " for " + esc(ptrName(sid)) : ""}:</b> ${chs.map(c => `<button class="sec sm" data-vt="${c.t}" data-vi="${idx}">${fmtT(c.t)} ${esc(c.label)}</button>`).join(" ")}</div>` : ""}</div>`;
   });
   return h || `<div class="note">No lesson video for this pointer yet.</div>`;
 }
+const _liteBusy = new WeakMap();
+function loadLite(card) {
+  const v = card.querySelector("video"), vd = D.local_videos[+card.dataset.vi], st = card.querySelector(".vstat");
+  if (v.dataset.lite === "1") return Promise.resolve();
+  if (_liteBusy.has(card)) return _liteBusy.get(card);
+  if (st) st.textContent = " Loading…";
+  const pr = fetch(liteSrc(vd)).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(async b64 => {
+    const bin = atob(b64.trim()), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    v.src = URL.createObjectURL(new Blob([u], { type: "video/mp4" })); v.dataset.lite = "1";
+    v.querySelectorAll("track").forEach(t => t.remove());
+    if (vd.vtt) { try { const tr = await fetch(liteVtt(vd)); if (tr.ok) { const tk = document.createElement("track"); tk.kind = "subtitles"; tk.srclang = "en"; tk.label = "English"; tk.default = true; tk.src = URL.createObjectURL(new Blob([await tr.text()], { type: "text/vtt" })); v.appendChild(tk); } } catch (e) {} }
+    await new Promise(res => { v.addEventListener("loadedmetadata", res, { once: true }); v.load(); });
+    if (st) st.textContent = " Lite copy loaded.";
+  }).catch(e => { if (st) st.textContent = " Lite copy not available here (" + e.message + "). Use the videos zip."; _liteBusy.delete(card); throw e; });
+  _liteBusy.set(card, pr); return pr;
+}
 function vidWire() {
-  document.querySelectorAll(".vcard video").forEach(v => v.addEventListener("error", () => { const m = v.parentNode.querySelector(".vmiss"); if (m) m.style.display = ""; }, true));
-  document.querySelectorAll("[data-vt]").forEach(b => b.onclick = () => { const v = b.closest(".vcard").querySelector("video"); const go = () => { v.currentTime = +b.dataset.vt; v.play().catch(() => {}); }; if (v.readyState < 1) { v.addEventListener("loadedmetadata", go, { once: true }); v.load(); } else go(); });
+  const web = /^https?:/.test(location.protocol);
+  document.querySelectorAll(".vcard").forEach(card => {
+    const v = card.querySelector("video"), m = card.querySelector(".vmiss");
+    const show = () => { if (v.dataset.lite !== "1" && m) m.style.display = ""; };
+    v.addEventListener("error", show, true);
+    const btn = card.querySelector(".vlite"); if (btn) btn.onclick = () => loadLite(card).then(() => v.play().catch(() => {})).catch(() => {});
+    if (web) fetch(v.getAttribute("src"), { method: "HEAD" }).then(r => { if (!r.ok) show(); }).catch(show);
+  });
+  document.querySelectorAll("[data-vt]").forEach(b => b.onclick = () => { const card = b.closest(".vcard"), v = card.querySelector("video");
+    const seek = () => { v.currentTime = +b.dataset.vt; v.play().catch(() => {}); };
+    const go = () => { if (v.readyState < 1) { v.addEventListener("loadedmetadata", seek, { once: true }); v.load(); } else seek(); };
+    const m = card.querySelector(".vmiss");
+    if (m && m.style.display !== "none" && v.dataset.lite !== "1") loadLite(card).then(seek).catch(() => {}); else go(); });
 }
 const today = () => new Date().toISOString().slice(0, 10);
 function reelCard(v) {
@@ -587,6 +617,20 @@ ROUTES.reels = p => {
     <h3>Read, don't watch</h3><ul>${D.docs.map(d => `<li><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a></li>`).join("")}</ul>`, reelWire];
 };
 
+/* ---------- study tools: NotebookLM + Vaia per pointer ---------- */
+function studyCard(sid) {
+  const st = (D.study || {})[sid], L = D.study_links; if (!st) return "";
+  const myv = D.local_videos.filter(v => (v.ptrs || []).includes(sid) && v.chapters.length).map(v => v.title);
+  const li = a => `<ul>${a.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`;
+  const cp = (k, t) => `<details><summary>${esc(t)}</summary><div class="note" style="white-space:pre-wrap;user-select:all">${esc(st.prompts[k])}</div><button class="btn sm sec" data-copy="${esc(st.prompts[k])}">Copy prompt</button></details>`;
+  return `<div class="card studycard"><b>📓 NotebookLM + 🎓 Vaia for ${esc(sid)}</b>
+    <div class="links studylinks" style="margin:8px 0"><a class="btn sm" href="${esc(L.vaia_url)}" target="_blank" rel="noopener" data-study="vaia">🎓 Open Vaia study set</a> <a class="btn sm sec" href="${esc(L.nb_url)}" target="_blank" rel="noopener" data-study="nb">📓 Open NotebookLM notebook</a></div>
+    <div class="grid2"><div><b>🎓 Vaia: filter by tag</b><div class="note" style="margin:6px 0">Tag <b>${esc(st.tag)}</b> <span class="src">(full tag: ${esc(st.full)})</span><br>${st.cards} cards planned for this tag. Alternative filter: <b>${esc(st.topic)}</b> (also catches the sample/old-test cards).</div><div class="src">Cards to expect:</div>${li(st.eg)}</div>
+    <div><b>📓 NotebookLM: tick these sources</b>${li(st.decks.concat(st.pack))}<div class="src">Also: your own videos${myv.length ? " (" + esc(myv.join("; ")) + ")" : ""}, and the <b>Recap (1-5)</b> video already in the notebook.</div></div></div>
+    <b>Ask NotebookLM (copy, then paste into its chat or Studio)</b>${cp("quiz", "Quiz prompt")}${cp("overview", "Video Overview prompt")}${cp("cards", "Flashcard prompt")}
+    <div class="src" style="margin-top:6px">${esc(L.nb_note)}</div></div>`;
+}
+ROUTES.study = () => [`<h2>📓🎓 Study tools: NotebookLM + Vaia</h2><div class="note">Per exam pointer: which Vaia tag to filter, which NotebookLM sources to tick, and prompts for a quiz, a video overview and flashcards. <a href="${esc(D.study_links.nb_url)}" target="_blank" rel="noopener">${esc(D.study_links.nb_label)}</a> · <a href="${esc(D.study_links.vaia_url)}" target="_blank" rel="noopener">${esc(D.study_links.vaia_label)}</a></div><div class="note warn"><b>Check the Vaia set.</b> ${esc(D.study_links.vaia_note)}</div>${D.secs.filter(s => D.study[s.id]).map(s => `<h3>${esc(s.title)}</h3>${studyCard(s.id)}`).join("")}`, null];
 /* ---------- pointer map ---------- */
 function pointerSection(sid) {
   const x = secById[sid], m = D.pmap[sid] || { sg: [], slides: [], papers: [] };
@@ -597,6 +641,7 @@ function pointerSection(sid) {
   <div class="card"><b>CA / past-paper questions</b>${li(m.papers)}<b>Flow steps (${steps.length})</b>${steps.length ? `<ul>${steps.map(s => `<li><a href="#/f/${s.id}">${esc(s.group)} · ${esc(s.title)}</a> (${s.marks} marks)</li>`).join("")}</ul>` : "<p class='muted'>none for this pointer (practice sets below)</p>"}
     <b>More // TODO sets:</b> <a href="#/s/${sid}/code">${ex.length} sets (easy/medium/hard)</a> · <b>Quiz</b> <a href="#/quiz/${sid}">${D.quiz.filter(q => q.sec === sid).length} questions</a> · <b>Keycards</b> <a href="#/cards/${sid}">${D.cards.filter(c => c.sec === sid).length}</a></div>
   <div class="card"><b>My lesson videos + chapter timestamps</b>${lessonVideosHTML(sid)}</div>
+  ${studyCard(sid)}
   <div class="card"><b>Reels (${reels.length})</b><ul>${reels.map(v => `<li><a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.title)}</a> <span class="src">${esc(v.len)} · ${esc(v.chan)}</span></li>`).join("")}</ul><a class="btn sm sec" href="#/reels/${sid}">Open as feed</a></div>
   <div class="card"><b>Fill-ins (${fills.length}, practice only: the exam uses // TODO)</b> <a class="btn sm sec" href="#/fill/${sid}">Practise</a></div></section>`;
 }
@@ -858,6 +903,8 @@ exWire = function () {
     if (wrap && r.lastMarks) wrap.innerHTML = `<div class="card"><h3>Your mark</h3><p>Instant feedback (from ✔ Check): <b>${esc(r.lastMarks)}</b>. ${r.done ? "✅ Marked done." : "Fix the missing pieces and press Check again."}</p></div>`;
   });
 };
+
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-copy]"); if (!b) return; const t = b.dataset.copy; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = "Copied"; }).catch(() => { const d = b.previousElementSibling; if (d && d.tagName === "DETAILS") { const n = d.querySelector(".note"); if (n) { const r = document.createRange(); r.selectNodeContents(n); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } } b.textContent = "Select + copy"; }); });
 
 
 /* ---------- router ---------- */
