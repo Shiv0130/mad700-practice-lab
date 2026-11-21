@@ -1,0 +1,253 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:15.000
+This is lesson four, XML layouts — pointer P2. We stay inside this pointer: layout
+attributes, ConstraintLayout, and merge plus include from the study guide, pages 107 and 108.
+
+00:00:15.000 --> 00:00:28.320
+I'll show the real slides and the study guide, write the XML on a board, then build a real app on
+a real emulator. We'll break four layouts, fix them, and finish with two exam-style TODO questions.
+
+00:00:28.320 --> 00:00:34.272
+Aim for the paper on Tuesday the
+24th of November, Lab 1, 9 o'clock.
+
+00:00:34.272 --> 00:00:51.672
+Here is the UI Architecture slide on the layout types. FrameLayout stacks children in one corner. LinearLayout
+is a row or a column. RelativeLayout places a child relative to the parent or a sibling. GridLayout is a table.
+
+00:00:51.672 --> 00:00:57.072
+The exam will name these, and it will ask you
+for the attributes that place the children.
+
+00:00:57.072 --> 00:01:03.648
+Match parent means fill the parent. Wrap
+content means shrink to the widget's own size.
+
+00:01:03.648 --> 00:01:18.912
+Padding is space inside a view; margin is space outside it. Sizes in layouts use dp, so they stay the
+same physical size on different screens. Text uses sp, so it can follow the user's font-size setting.
+
+00:01:18.912 --> 00:01:35.424
+On EditText, the exam also likes inputType, hint, and imeOptions. inputType textEmailAddress or textPassword
+changes the keyboard. hint is the grey placeholder. imeOptions actionNext moves to the next field.
+
+00:01:35.424 --> 00:01:50.496
+Study guide page 105. A vertical LinearLayout holds a horizontal one. That inner row has
+padding of 5 dp, and two buttons. Each button has weight 1, so they share the row equally.
+
+00:01:50.496 --> 00:02:02.856
+The study guide writes fill parent plus weight. The cheatsheet and Sample
+B write 0 dp plus weight. Both work. Write 0 dp — that is the current form.
+
+00:02:02.856 --> 00:02:18.456
+Same pages, RelativeLayout. The button bar uses layout_alignParentBottom, so it sits on the
+bottom of the screen. The ListView uses layout_above the bar, and layout_alignParentLeft.
+
+00:02:18.456 --> 00:02:28.224
+The cheatsheet also has layout_alignParentStart,
+layout_toEndOf, and layout_below — same idea, different names.
+
+00:02:28.224 --> 00:02:40.848
+One trap: a RelativeLayout question is not answered with a constraint attribute.
+That's layout_alignParentBottom, not layout_constraintBottom_toBottomOf.
+
+00:02:40.848 --> 00:02:55.272
+ConstraintLayout, from the XML cheatsheet and from Sample B question 4. You pin a side of a view to
+a side of the parent or another view. Width 0 dp means stretch between the start and end anchors.
+
+00:02:55.272 --> 00:03:07.608
+layout_constraintTop_toTopOf, Start_toStartOf, End_toEndOf,
+Top_toBottomOf, Bottom_toBottomOf — learn those five names.
+
+00:03:07.608 --> 00:03:28.584
+Study guide pages 107 and 108, and UI Architecture slide 15. include pastes another layout file into this one. If that file's root
+is merge, the merge tag is thrown away, and its children join the parent directly — no extra wrapper. That flattens the hierarchy.
+
+00:03:28.584 --> 00:03:36.912
+Do not call setContentView on a merge layout. Merge is
+only valid when it is being included into a real parent.
+
+00:03:36.912 --> 00:03:47.184
+Here is UI Architecture slide 15. Flatten the hierarchy: keep
+layouts under 10 levels, and use merge to erase a redundant root.
+
+00:03:47.184 --> 00:03:54.144
+ViewStub is on this slide too, but it is not on the
+official pointer list, so we will not write it on the board.
+
+00:03:54.144 --> 00:03:58.200
+A horizontal LinearLayout
+with padding 5 dp.
+
+00:03:58.650 --> 00:04:08.490
+Each button is width 0 dp, and layout_weight 1. They share
+the leftover space equally, so List and Add are the same size.
+
+00:04:08.940 --> 00:04:14.196
+If you drop the weight and leave wrap content,
+they shrink to the left and leave a gap.
+
+00:04:14.646 --> 00:04:23.406
+The list screen is a RelativeLayout. The title is
+alignParentTop. The included bar is alignParentBottom.
+
+00:04:23.856 --> 00:04:30.984
+The items sit layout_above the bar,
+layout_below the title, and alignParentLeft.
+
+00:04:31.434 --> 00:04:35.874
+Change the bar to alignParentTop,
+and it covers the title.
+
+00:04:36.324 --> 00:04:49.788
+The form is ConstraintLayout. The name field is width 0 dp, top, start and end of the
+parent — so it stretches full width under the top. Quantity is top_toBottomOf the name.
+
+00:04:50.238 --> 00:04:55.158
+Save is 0 dp, pinned to the
+bottom of this ConstraintLayout.
+
+00:04:55.608 --> 00:05:02.256
+Miss those constraints, and the button jumps to
+zero, zero — the top-left — and covers the title.
+
+00:05:02.706 --> 00:05:11.778
+header_banner.xml starts with merge, not a FrameLayout.
+include it, and the two TextViews join the parent.
+
+00:05:12.228 --> 00:05:17.868
+The bar file keeps a LinearLayout root,
+because we need one view to pin to the bottom.
+
+00:05:18.318 --> 00:05:28.662
+Inflate a merge file with no parent, as if it were a screen, and you get InflateException:
+merge can be used only with a valid ViewGroup root and attachToRoot true.
+
+00:05:29.112 --> 00:05:45.504
+This is the real project, Pantry Layouts. The add screen is a vertical LinearLayout: the merge banner, a ConstraintLayout
+form, and the weighted bar. The list screen is the RelativeLayout we just wrote. Every line has a comment.
+
+00:05:45.504 --> 00:06:02.088
+Look at the constraints on the name field: width 0 dp, top, start and end of the parent. Quantity is top_toBottomOf
+the name. Save is pinned to the bottom of this ConstraintLayout, full width, just above the included bar.
+
+00:06:02.088 --> 00:06:20.712
+This is header_banner.xml from the real project. The root is merge, not a FrameLayout. Two TextViews: the title and
+a short subtitle. When activity_main includes this file, these two views join the vertical LinearLayout directly.
+
+00:06:20.712 --> 00:06:38.160
+And this is bar_actions.xml. A horizontal LinearLayout, padding 5 dp, two buttons, each 0 dp with weight 1.
+This file keeps a real LinearLayout root, so the list screen can pin the whole bar to the bottom as one view.
+
+00:06:38.160 --> 00:06:55.560
+The list screen is a RelativeLayout. The title is alignParentTop. The included bar is alignParentBottom. The
+items sit above the bar, below the title, and alignParentLeft. That is the study guide pattern, in a real file.
+
+00:06:55.560 --> 00:07:01.464
+Gradle assembleDebug — BUILD SUCCESSFUL,
+on this machine, with the real project.
+
+00:07:01.464 --> 00:07:12.336
+And here it is on a real Pixel 6, API 34. I type Rice, 2,
+pick Cups, tick Staple, hide the keyboard, and tap Save.
+
+00:07:12.336 --> 00:07:18.840
+The list shows Rice x 2 cups, staple, and the
+List and Add buttons sit equal at the bottom.
+
+00:07:18.840 --> 00:07:24.408
+List and Add switch the two screens.
+The same bar is included on both.
+
+00:07:24.408 --> 00:07:36.192
+Mistake one. I removed the constraint attributes from Save. No crash — the button
+just sits at the top-left and covers the title. Constraints are not optional.
+
+00:07:36.192 --> 00:07:41.328
+Put them back, rebuild, and Save is
+at the bottom again, full width.
+
+00:07:41.328 --> 00:07:51.888
+Mistake two. I took layout_weight off the List and Add buttons and left
+wrap content. They no longer share the row; they shrink to the left.
+
+00:07:51.888 --> 00:07:56.304
+Put 0 dp and weight 1 back,
+and they are equal again.
+
+00:07:56.304 --> 00:08:06.864
+Mistake three. I treated the merge banner as a screen: setContentView
+of an inflate of header_banner with a null parent. The app stops.
+
+00:08:06.864 --> 00:08:13.968
+Logcat: InflateException, merge can be used only
+with a valid ViewGroup root and attachToRoot true.
+
+00:08:13.968 --> 00:08:23.160
+A merge layout is not a screen. Point setContentView at
+activity_main, which includes the banner, and it starts cleanly.
+
+00:08:23.160 --> 00:08:32.784
+Mistake four. On the list, I set the bar to alignParentTop,
+and I dropped layout_above. The bar covers the title.
+
+00:08:32.784 --> 00:08:40.440
+Put alignParentBottom back, and layout_above on the
+items, and the bar sits on the bottom where it belongs.
+
+00:08:40.440 --> 00:08:54.072
+Write these down. 0 dp plus weight shares a LinearLayout row. RelativeLayout uses
+alignParentBottom, layout_above, alignParentLeft — not constraint attributes.
+
+00:08:54.072 --> 00:09:05.304
+ConstraintLayout needs anchors; 0 dp stretches between them. include
+with merge throws the merge tag away. Do not setContentView a merge file.
+
+00:09:05.304 --> 00:09:24.048
+In the exam, name the attribute correctly for the layout you are in. RelativeLayout is layout_alignParentBottom,
+layout_above, layout_alignParentLeft. ConstraintLayout is the constraint family, and 0 dp stretches between anchors.
+
+00:09:24.048 --> 00:09:35.688
+For a weighted row, write 0 dp and layout_weight. If you see include and merge,
+remember merge is thrown away, and you must not setContentView that file.
+
+00:09:35.688 --> 00:09:44.592
+Write the ids carefully: a typo in layout_above or in a
+constraint is a blank or overlapping screen, not a compile error.
+
+00:09:44.592 --> 00:09:53.592
+Your turn. Two questions, TODO style, like the CA. Pause,
+write your XML, then I'll show the answers and a real run.
+
+00:09:53.592 --> 00:10:08.304
+Question 1 is CA Test question 2: a vertical LinearLayout login screen. Fill in the four
+TODOs: orientation, the email EditText, the password EditText, and a Login button with ems 10.
+
+00:10:28.304 --> 00:10:39.849
+Question 2 is in the Smart Pantry Add Ingredient setting. It draws
+on Sample B question 4 and the study guide, pages 107 and 108.
+
+00:10:39.849 --> 00:10:48.801
+Four TODOs: include the merge banner, constrain the name field,
+pin Save to the bottom, and include the weighted bar as navbar.
+
+00:11:08.801 --> 00:11:24.833
+Here are the answers. Question 1: orientation vertical; email is full width, wrap height, inputType
+textEmailAddress, hint Email; password uses textPassword; the button is wrap content, ems 10, text Login.
+
+00:11:24.833 --> 00:11:39.713
+Question 2: include header_banner; the name field is width 0 dp with top, start and end of parent;
+Save is 0 dp, bottom, start and end of the ConstraintLayout; include bar_actions as navbar.
+
+00:11:39.713 --> 00:11:49.289
+And a real run of those answers: the login screen, tap Login, and the
+form we built — banner, fields, Save, and the equal List and Add bar.
+
+00:11:49.289 --> 00:11:58.289
+That's lesson four. Next is lesson five: the basics, more
+layout attributes, and testing with boundary value analysis.
+
+00:11:58.289 --> 00:12:06.113
+Write the two questions on paper, run the project, and
+send me photos of your work. See you in the next one.
