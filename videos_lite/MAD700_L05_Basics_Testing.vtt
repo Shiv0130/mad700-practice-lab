@@ -1,0 +1,261 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:19.200
+This is lesson five of MAD700, pointer P1. Activities, layouts, Intents, how you wire a screen in onCreate, the layout
+attributes the exam still asks, mobile testing, and boundary value analysis from the study guide, pages 203 and 204.
+
+00:00:19.200 --> 00:00:34.536
+I'll show the real slides and the study guide, write the Java and XML on a board, then build a real app on a real
+emulator. We'll break four exam traps, fix them, and finish with two TODO questions from the class test and a past paper.
+
+00:00:34.536 --> 00:00:40.488
+Aim for the paper on Tuesday the
+24th of November, Lab 1, 9 o'clock.
+
+00:00:40.488 --> 00:00:59.880
+Open the Architecting Android Navigation deck. An Activity is the brain of one screen, a subclass of AppCompatActivity. You
+never instantiate it yourself. A layout is the face, an XML tree of views. An Intent is the messenger that starts another screen.
+
+00:00:59.880 --> 00:01:10.272
+An explicit Intent names the class you want, inside your app. An implicit
+Intent names an action, and Android finds an app that can handle it.
+
+00:01:10.272 --> 00:01:20.040
+If you start an Activity that is not listed in the manifest, the app
+crashes. That is a favourite exam trap, and I will show it on a real run.
+
+00:01:20.040 --> 00:01:35.232
+Now the Wiring Android Logic deck. onCreate is where the screen is created. You always call super.onCreate
+first, then setContentView to inflate the XML, and only after that do you call findViewById.
+
+00:01:35.232 --> 00:01:47.328
+If you reverse that order, findViewById returns null, and the next line that touches the widget
+throws a NullPointerException. I will crash the app on purpose so you can see the dialog.
+
+00:01:47.328 --> 00:01:57.096
+Inside an anonymous click listener, this is the listener, not the
+Activity. Write MainActivity.this when you build an Intent or a Toast.
+
+00:01:57.096 --> 00:02:09.576
+The lifecycle is onCreate, onStart, onResume, then onPause, onStop, and
+onDestroy. The Back button typically resumes with onResume, not a fresh onCreate.
+
+00:02:09.576 --> 00:02:22.128
+Rotation destroys the Activity and creates a new one. If you have state that is not already in an
+EditText, you save it in the Bundle with onSaveInstanceState, and you read it back in onCreate.
+
+00:02:22.128 --> 00:02:31.608
+Sample A question 1 and Sample B question 1 both test that you know
+this. Do not just write that the app restarts — name the callbacks.
+
+00:02:31.608 --> 00:02:46.512
+P1 still asks layout attributes. match_parent fills the parent. wrap_content is
+only as big as the content. For sizes use dp, for text use sp, never raw pixels.
+
+00:02:46.512 --> 00:03:02.688
+Padding is space inside the view. Margin is space outside it. gravity places the content inside this
+view. layout_gravity places this view inside its parent. A FrameLayout defaults to the top left.
+
+00:03:02.688 --> 00:03:20.640
+In a LinearLayout, 0 dp plus layout_weight shares leftover space. Older study-guide pages still write
+fill_parent; the current form is 0 dp. I will not redo ConstraintLayout, merge, or include — that was lesson four.
+
+00:03:20.640 --> 00:03:30.312
+The Blueprints deck is clear: an emulator cannot perfectly simulate sensors
+such as GPS. Test on a real device as well, especially for hardware.
+
+00:03:30.312 --> 00:03:39.552
+To enable USB debugging, open About phone and tap the Build number
+seven times, then turn on USB debugging in Developer options.
+
+00:03:39.552 --> 00:04:00.672
+Study-guide pages 203 and 204 call this fragmentation. You must test the minimum SDK, the target SDK, each screen size, and
+different manufacturers. Chapter 1 still lists screen size and orientation, connectivity, battery, and hardware as testing issues.
+
+00:04:00.672 --> 00:04:09.384
+Page 203 is the only study-guide page on boundary value analysis,
+and there is no lecturer slide for it, so learn this wording.
+
+00:04:09.384 --> 00:04:24.672
+The limits for each input should be identified, and each side of the limit should be tested. For a birthday, today
+is displayed, and the next day is an error. For a telephone number, too many and too few digits are both tested.
+
+00:04:24.672 --> 00:04:39.240
+Worked the same way, a quantity of 1 to 99 is tested at 0, 1, 2, 98, 99, and 100.
+Use greater-than-or-equal and less-than-or-equal so the limits themselves pass.
+
+00:04:39.240 --> 00:04:50.568
+On the board: MainActivity extends AppCompatActivity. In onCreate,
+call super first, then setContentView, and only then findViewById.
+
+00:04:51.018 --> 00:04:56.946
+setOnClickListener takes an anonymous
+listener. The tap handler is onClick.
+
+00:04:57.396 --> 00:05:02.220
+That is the wiring the class test
+asks you to write, line by line.
+
+00:05:02.670 --> 00:05:11.478
+An explicit Intent names the target class. Use
+MainActivity.this, not this, because we are inside the listener.
+
+00:05:11.928 --> 00:05:18.096
+putExtra attaches the name and the quantity,
+then startActivity opens the next screen.
+
+00:05:18.546 --> 00:05:29.730
+On ResultActivity, getIntent and getStringExtra or getIntExtra read those
+values. The second argument of getIntExtra is the default if the key is missing.
+
+00:05:30.180 --> 00:05:40.692
+A vertical LinearLayout, padding 16 dp — padding is space
+inside. The title is wrap_content, not match_parent.
+
+00:05:41.142 --> 00:05:50.118
+gravity centre horizontal places the text inside
+this TextView. textSize is 22 sp, not pixels.
+
+00:05:50.568 --> 00:05:57.336
+Each button is 0 dp with weight 1, and
+layout_marginTop is space outside the button.
+
+00:05:57.786 --> 00:06:07.674
+isQuantityValid returns true when the quantity is greater than or
+equal to 1, and less than or equal to 99. The limits themselves pass.
+
+00:06:08.124 --> 00:06:15.156
+isPackedDateAllowed uses the study guide's birthday
+rule: today is accepted, tomorrow is rejected.
+
+00:06:15.606 --> 00:06:25.446
+The six boundary values for 1 to 99 are 0
+no, 1 yes, 2 yes, 98 yes, 99 yes, and 100 no.
+
+00:06:25.896 --> 00:06:38.400
+This is the real project, Pantry Basics. MainActivity wires the form after setContentView,
+pre-fills today's packed date, and on Save it validates the quantity and the date.
+
+00:06:38.400 --> 00:06:48.624
+A valid save builds an explicit Intent to ResultActivity, with MainActivity.this,
+and puts extras for the name, the quantity, and the packed date.
+
+00:06:48.624 --> 00:07:03.768
+Validator is a small helper, no widgets. isQuantityValid uses greater-than-or-equal and less-than-or-equal.
+isPackedDateAllowed compares two ISO date strings, so today and any earlier date are allowed.
+
+00:07:03.768 --> 00:07:08.472
+The comment lists the six boundary
+values the exam wants you to name.
+
+00:07:08.472 --> 00:07:14.376
+Gradle assembleDebug — BUILD SUCCESSFUL,
+on this machine, with the real project.
+
+00:07:14.376 --> 00:07:28.320
+And here it is on a real Pixel 6, API 34. I type Rice, 12, leave the packed
+date as today, the 21st of November 2026, hide the keyboard, and tap Save.
+
+00:07:28.320 --> 00:07:36.336
+ResultActivity reads the extras and
+shows Rice x 12, packed 2026-11-21.
+
+00:07:36.336 --> 00:07:46.344
+Mistake one. I called findViewById before setContentView. Every
+widget is still null, and the app stops as soon as it starts.
+
+00:07:46.344 --> 00:07:53.232
+Logcat: a NullPointerException, because
+findViewById ran before the layout was inflated.
+
+00:07:53.232 --> 00:07:58.248
+Put setContentView first, rebuild,
+and the form appears cleanly.
+
+00:07:58.248 --> 00:08:10.416
+Mistake two. I wrote greater than 1 and less than 99. I type Rice and
+1, with today's date, and Save is rejected. The limit itself must pass.
+
+00:08:10.416 --> 00:08:21.648
+Change it to greater-than-or-equal and less-than-or-equal, type 1 again, and
+the result screen opens: Rice x 1, packed today. The limit itself now passes.
+
+00:08:21.648 --> 00:08:32.928
+Mistake three. I left ResultActivity out of the manifest. The form
+is valid — Rice, 12, today's date — I tap Save, and the app stops.
+
+00:08:32.928 --> 00:08:45.048
+Logcat: ActivityNotFoundException, Unable to find explicit activity class
+ResultActivity. Have you declared this activity in your AndroidManifest.xml?
+
+00:08:45.048 --> 00:08:54.120
+Register ResultActivity in the manifest, rebuild, and the same valid
+Save now opens the result screen, because the class is listed.
+
+00:08:54.120 --> 00:09:03.336
+Mistake four does not even install. I wrote new Intent(this,
+ResultActivity.class) inside the anonymous listener.
+
+00:09:03.336 --> 00:09:14.136
+This is the real Gradle output: no suitable constructor for Intent, because
+this is the OnClickListener, not a Context. It must be MainActivity.this.
+
+00:09:14.136 --> 00:09:23.976
+Write these down. setContentView before findViewById.
+Inside a listener, write MainActivity.this, not this.
+
+00:09:23.976 --> 00:09:36.144
+Every Activity you start must be in the manifest. For boundary value analysis, test each side
+of each limit, and keep the limits valid with greater-than-or-equal and less-than-or-equal.
+
+00:09:36.144 --> 00:09:48.312
+In the exam, write the explicit Intent with MainActivity.this and the class, then
+startActivity. putExtra on the way out, getStringExtra or getIntExtra on the way in.
+
+00:09:48.312 --> 00:10:03.840
+Back resumes with onResume, not onCreate. Rotation destroys and recreates; use the
+Bundle. dp for sizes, sp for text, padding versus margin, gravity versus layout_gravity.
+
+00:10:03.840 --> 00:10:15.552
+And for testing: min SDK, target SDK, each screen size, and different
+manufacturers. Test sensors on a real device, not only the emulator.
+
+00:10:15.552 --> 00:10:25.489
+Your turn. Two questions, TODO style, like the class test. Pause,
+write your Java, then I'll show the answers and a real run.
+
+00:10:25.489 --> 00:10:45.313
+Question 1 is CA Test question 1.2, and past-paper TODO question 1. Inside the click listener, create an explicit Intent from MainActivity
+to ResultActivity, attach the name under the key name, and start the Activity. On ResultActivity, read that extra and show it.
+
+00:11:05.313 --> 00:11:13.497
+Question 2 is past-paper TODO question 5, on
+study-guide page 203, in a Smart Pantry setting.
+
+00:11:13.497 --> 00:11:27.753
+Three TODOs: write isQuantityValid for 1 to 99 inclusive, write isPackedDateAllowed so today is accepted
+and tomorrow is rejected, and list the six boundary values for the quantity, with accepted or rejected.
+
+00:11:47.753 --> 00:12:03.689
+Here are the answers. Question 1: new Intent, MainActivity.this, ResultActivity.class, putExtra
+name, startActivity. On the other screen, getIntent, getStringExtra name, and setText.
+
+00:12:03.689 --> 00:12:22.889
+Question 2: isQuantityValid is greater-than-or-equal 1 and less-than-or-equal 99. isPackedDateAllowed accepts
+today and rejects a later date. The six values are 0 rejected, 1 and 2 accepted, 98 and 99 accepted, 100 rejected.
+
+00:12:22.889 --> 00:12:40.481
+And a real run of those answers. The report lists 0 rejected, 1 and 2 accepted, 98 and 99
+accepted, 100 rejected. Today, the 21st of November, is accepted; tomorrow, the 22nd, is rejected.
+
+00:12:40.481 --> 00:12:52.337
+Then I open the form, type Rice and 12, tap Save, and the
+extras arrive on ResultActivity: Rice x 12, packed 2026-11-21.
+
+00:12:52.337 --> 00:13:02.153
+That's lesson five, and the last of the planned reteach videos.
+The exam is Tuesday the 24th of November, 9 o'clock, Lab 1.
+
+00:13:02.153 --> 00:13:07.961
+Write the two questions on paper, run the
+project, and send me photos of your work.
