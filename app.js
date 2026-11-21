@@ -564,7 +564,13 @@ function loadLite(card) {
   if (v.dataset.lite === "1") return Promise.resolve();
   if (_liteBusy.has(card)) return _liteBusy.get(card);
   if (st) st.textContent = " Loading…";
-  const pr = fetch(liteSrc(vd)).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }).then(async b64 => {
+  const getB64 = async () => {
+    let r = await fetch(liteSrc(vd)); if (r.ok) return r.text();
+    let out = "", i = 0;
+    for (;;) { r = await fetch(liteSrc(vd) + "." + String(i).padStart(3, "0")); if (!r.ok) break; out += await r.text(); i++; if (st) st.textContent = " Loading part " + i + "…"; }
+    if (!i) throw new Error("HTTP " + r.status); return out;
+  };
+  const pr = getB64().then(async b64 => {
     const bin = atob(b64.trim()), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
     v.src = URL.createObjectURL(new Blob([u], { type: "video/mp4" })); v.dataset.lite = "1";
     v.querySelectorAll("track").forEach(t => t.remove());
