@@ -634,6 +634,231 @@ ROUTES.cheat = () => [`<div class="noprint"><h2>🧾 Cheatsheet</h2><div class="
   <div class="csheet">${D.secs.map(s => `<h3>${esc(s.title)}</h3><div class="csgrid">${D.cheats.filter(c => c.sec === s.id).map(c => `<div class="cs"><div class="cstag">${esc(c.tag)}</div><b>${esc(c.title)}</b><pre class="cscode">${esc(c.code)}</pre></div>`).join("")}</div>`).join("")}
   <h3>Exam-morning keyword card</h3><div class="card">${D.home.keywords}</div></div>`, () => { $("#bPrint").onclick = () => window.print(); }];
 
+/* ---------- shared typed-answer rubric (quiz shorts, mock shorts, any other prose) ---------- */
+const UNITS = new Set("dp sp px em dip id ui xml sql".split(" "));
+function kwA(s) {
+  const out = [];
+  for (const w of String(s).toLowerCase().match(/[a-z0-9_]{2,}/g) || []) {
+    if (STOP.has(w) && !UNITS.has(w)) continue;
+    if (w.length < 4 && !UNITS.has(w)) continue;
+    const k = w.length >= 6 ? w.slice(0, 6) : w;
+    if (!out.includes(k)) out.push(k);
+  }
+  return out;
+}
+function ideaHit(user, idea) {
+  const u = String(user || "");
+  const words = new Set(kwA(u));
+  const must = idea.must || [];
+  const mustHit = must.filter(t => { try { return new RegExp("\\b" + t.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&") + "\\b", "i").test(u); } catch (e) { return u.toLowerCase().includes(String(t).toLowerCase()); } });
+  const keys = idea.keys && idea.keys.length ? idea.keys : kwA(idea.text);
+  const keyHit = keys.filter(k => words.has((k.length >= 6 ? k.slice(0, 6) : k).toLowerCase()) || u.toLowerCase().includes(String(k).toLowerCase()));
+  if (must.length) {
+    const primary = must[0];
+    const primaryHit = mustHit.some(t => String(t).toLowerCase() === String(primary).toLowerCase());
+    if (!primaryHit) return false;
+    if (mustHit.length < Math.ceil(must.length * 0.5)) return false;
+    return true;
+  }
+  if (keys.length && keyHit.length / keys.length >= 0.5) return true;
+  return false;
+}
+function markTyped(opts) {
+  /* opts: { user, ideas, marks, question, alt, modelHtml, manual } -> { html, got, tot, kind, hits } */
+  const ideas = opts.ideas || [], M = opts.marks || ideas.length || 1;
+  const user = String(opts.user || ""), typed = user.trim().length > 0;
+  let hits = ideas.map(idea => ideaHit(user, idea));
+  if (opts.manual) hits = hits.map((h, i) => (i in opts.manual) ? opts.manual[i] : h);
+  const okN = hits.filter(Boolean).length, frac = ideas.length ? okN / ideas.length : (typed ? 1 : 0);
+  const kind = !typed ? "none" : (frac >= 0.999 ? "full" : okN ? "part" : "none");
+  const g = !typed ? 0 : (kind === "full" ? M : Math.max(0, Math.min(M - 0.5, halfFloor(M * frac))));
+  const miss = ideas.map((x, i) => [x, i]).filter(([x, i]) => !hits[i]);
+  const right = ideas.map((x, i) => hits[i] ? x : null).filter(Boolean);
+  let fbh = "";
+  if (kind === "full") fbh = `<b>Correct ✔ ${fmtM(g)}/${fmtM(M)}.</b> You covered every idea the mark scheme looks for.<div class="alt"><b>ALTERNATIVE (another valid wording):</b> ${esc(opts.alt || "You can make the same points in a different order or with equivalent wording.")}</div>`;
+  else if (!typed) fbh = `<b>0/${fmtM(M)}.</b> You haven't typed an answer yet. Have a go first: the model answer unlocks once you've tried.`;
+  else if (kind === "part") fbh = `<b>Partly there: ${fmtM(g)}/${fmtM(M)}.</b><br><b>Right:</b> ${right.map(x => "✓ " + esc((x.text || x).slice(0, 80)) + ((x.text || x).length > 80 ? "…" : "")).join(" · ")}<br><b>Missing:</b><ul class="why">${miss.map(([x]) => `<li><b>${esc((x.text || x).slice(0, 90))}${(x.text || x).length > 90 ? "…" : ""}</b>: ${esc(x.why || "this is a separate mark-scheme point; without it the answer is incomplete")}.</li>`).join("")}</ul>`;
+  else fbh = `<b>${fmtM(g)}/${fmtM(M)}.</b> Your answer doesn't hit the key ideas yet.<br><b>The gap:</b> ${esc((ideas[0] && (ideas[0].text || ideas[0]) || "the mark scheme's main point").toString().slice(0, 160))}…<br><b>Key idea:</b> ${esc((ideas[0] && (ideas[0].text || ideas[0]) || "").toString().slice(0, 200))}`;
+  const showModel = typed && (kind !== "full");
+  const modelBlock = typed ? `<div class="fbr"><span>MODEL ANSWER</span><div>${kind === "full" ? `<details><summary>Show the model answer anyway</summary>${opts.modelHtml || `<p>${esc(ideas.map(x => x.text || x).join(" "))}</p>`}</details>` : `<details open><summary>Model answer</summary>${opts.modelHtml || `<p>${esc(ideas.map(x => x.text || x).join(" "))}</p>`}</details>`}</div></div>` : "";
+  const self = (typed && ideas.length) ? `<div class="fbr"><span>SELF-CHECK</span><div class="small">Did the marker miss something you did say? Tick it:${ideas.map((x, i) => `<label style="display:block"><input type="checkbox" data-idea="${i}" ${hits[i] ? "checked" : ""}> ${esc((x.text || x).slice(0, 110))}${(x.text || x).length > 110 ? "…" : ""}</label>`).join("")}</div></div>` : "";
+  const html = `<div class="fbk ${kind}"><div class="fbh">Short answer · <b>${fmtM(g)}/${fmtM(M)}</b> ${kind === "full" ? "✅" : kind === "part" ? "🟡" : "🔴"}</div>
+    <div class="fbr"><span>QUESTION</span><div>${opts.question || ""}</div></div>
+    <div class="fbr"><span>YOUR ANSWER</span><pre>${esc(user) || "(empty)"}</pre></div>
+    <div class="fbr"><span>FEEDBACK</span><div>${fbh}</div></div>
+    ${modelBlock}${self}</div>`;
+  return { html, got: g, tot: M, kind, hits };
+}
+
+function markMCQ(opts) {
+  const ok = opts.ok, M = opts.marks || 1, g = ok ? M : 0, kind = ok ? "full" : "none";
+  const fbh = ok
+    ? `<b>Correct ✔ ${fmtM(g)}/${fmtM(M)}.</b><div class="alt"><b>ALTERNATIVE (another way to remember it):</b> ${esc(opts.alt || "Name the idea in your own words in a short-answer paper; the letter is only for this MCQ.")}</div>`
+    : `<b>0/${fmtM(M)}.</b> That option isn't the one the memo marks.<br><b>The gap:</b> you picked ${esc(opts.picked || "a different option")}.<br><b>Key idea:</b> the correct option is <b>${esc(opts.correct)}</b>.`;
+  const html = `<div class="fbk ${kind}"><div class="fbh">MCQ · <b>${fmtM(g)}/${fmtM(M)}</b> ${ok ? "✅" : "🔴"}</div>
+    <div class="fbr"><span>QUESTION</span><div>${opts.question || ""}</div></div>
+    <div class="fbr"><span>YOUR ANSWER</span><div>${esc(opts.picked || "(no choice)")}</div></div>
+    <div class="fbr"><span>FEEDBACK</span><div>${fbh}</div></div>
+    <div class="fbr"><span>MODEL ANSWER</span><div>${ok ? `<details><summary>Show the model answer anyway</summary>${opts.modelHtml || ""}</details>` : `<details open><summary>Model answer</summary>${opts.modelHtml || ""}</details>`}</div></div></div>`;
+  return { html, got: g, tot: M, kind };
+}
+
+/* replace quiz + mock pages so short (and MCQ / mock typed) answers use the same rubric */
+quizPage = function (sid) {
+  const one = qById[sid];
+  if (one) {
+    if (!QZ || QZ.sid !== sid) QZ = { sid, list: [one], i: 0, right: 0, missed: [] };
+  } else if (!QZ || QZ.sid !== sid) quizStart(sid || "ALL");
+  const z = QZ;
+  if (z.i >= z.list.length) {
+    return `<h2>Quiz done: ${z.right}/${z.list.length} full marks</h2><div class="card"><h3>CATCH-UP</h3>${z.missed.length ? "<ul>" + z.missed.map(q => `<li>${esc(q.title)} <span class="src">(${esc(q.source)})</span>${(S.quiz[q.id] && S.quiz[q.id].got != null) ? ` · last ${fmtM(S.quiz[q.id].got)}/${fmtM(S.quiz[q.id].tot || q.marks || 1)}` : ""}</li>`).join("") + "</ul>" : "<p>Nothing missed. 🔥</p>"}</div>
+      <div class="row"><button id="qAgain">Again</button><a class="btn sec" href="${one ? "#/quiz/" + (one.sec) : (sid === "ALL" ? "#/" : "#/s/" + sid + "/code")}">Go code</a></div>`;
+  }
+  const q = z.list[z.i], rec = S.quiz[q.id] || {};
+  const body = q.kind === "mcq" ? q.choices.map((c, k) => `<button class="choice" data-k="${k}">${"ABCDE"[k]}. ${c}</button>`).join("")
+    : `<textarea class="tx" id="qa" placeholder="Answer like the paper: definition + how it works + example / code">${esc(rec.text || "")}</textarea><button id="qMark">✔ Mark my answer</button>`;
+  return `<p class="muted">${esc(one ? "Practice question" : (sid === "ALL" ? "Mixed" : (secById[sid] || {}).short || sid))} · question ${z.i + 1} of ${z.list.length}</p><div class="prog"><i style="width:${100 * z.i / z.list.length}%"></i></div>
+    <div class="card"><h3>${esc(q.title)}${q.marks ? ` <small class="muted">(${q.marks} marks)</small>` : ""}</h3>${q.stem}${body}<div id="qfb"></div></div><p class="src"><b>Source:</b> ${esc(q.source)}</p>`;
+};
+quizWire = function (sid) {
+  const z = QZ; if ($("#qAgain")) { $("#qAgain").onclick = () => { QZ = null; quizStart(qById[sid] ? sid : (sid || "ALL")); render(); }; return; }
+  const q = z.list[z.i], next = `<div class="row"><button id="qNext">Next →</button></div>`;
+  z.seen = z.seen || {};
+  const rec = (ok, got, tot, extra) => {
+    S.quiz[q.id] = Object.assign({ ok, got, tot, t: Date.now() }, extra || {});
+    if (!z.seen[q.id]) {
+      z.seen[q.id] = true;
+      if (ok) { z.right++; S.streak = (S.streak || 0) + 1; addXP(5); }
+      else { z.missed.push(q); if ((got || 0) > 0) addXP(2); else { S.streak = 0; save(); } }
+    } else {
+      const i = z.missed.findIndex(x => x.id === q.id);
+      if (ok && i >= 0) { z.missed.splice(i, 1); z.right++; }
+      save();
+    }
+  };
+  const wireNext = () => { const b = $("#qNext"); if (b) b.onclick = () => { z.i++; render(); }; };
+  const model = q.answer_html || "";
+  const stem = q.stem || esc(q.title);
+  if (q.kind === "mcq") document.querySelectorAll(".choice").forEach(b => b.onclick = () => {
+    const k = +b.dataset.k, ok = k === q.answer;
+    document.querySelectorAll(".choice").forEach(x => { x.disabled = true; if (+x.dataset.k === q.answer) x.classList.add("ok"); });
+    if (!ok) b.classList.add("no");
+    const r = markMCQ({ ok, marks: q.marks || 1, question: stem, picked: "ABCDE"[k] + ". " + stripHTML(q.choices[k]), correct: "ABCDE"[q.answer] + ". " + stripHTML(q.choices[q.answer]), alt: q.alt, modelHtml: model });
+    rec(ok, r.got, r.tot, { kind: "mcq", picked: k });
+    $("#qfb").innerHTML = r.html + next; wireNext();
+  });
+  else {
+    const run = (manual) => {
+      const text = ($("#qa") && $("#qa").value) || "";
+      const r = markTyped({ user: text, ideas: q.ideas || [], marks: q.marks || 1, question: stem, alt: q.alt, modelHtml: model, manual });
+      rec(r.kind === "full", r.got, r.tot, { kind: "short", text, hits: r.hits });
+      $("#qfb").innerHTML = r.html + (text.trim() ? next : "");
+      wireNext();
+      document.querySelectorAll("#qfb input[data-idea]").forEach(cb => cb.onchange = () => {
+        const man = {}; document.querySelectorAll("#qfb input[data-idea]").forEach(x => man[+x.dataset.idea] = x.checked);
+        S.quiz[q.id].manual = man; run(man);
+      });
+    };
+    $("#qMark").onclick = () => run(S.quiz[q.id] && S.quiz[q.id].manual);
+    if (S.quiz[q.id] && S.quiz[q.id].text && S.quiz[q.id].got != null) {
+      // re-show last feedback without scoring again
+      const hold = z.seen[q.id]; z.seen[q.id] = true; run(S.quiz[q.id].manual); z.seen[q.id] = hold || true;
+    }
+  }
+};
+
+function mockItemFeedback(it, key, a, m) {
+  if (it.k === "q") {
+    const q = qById[it.id];
+    if (q.kind === "mcq") {
+      const picked = a != null ? "ABCDE"[a] + ". " + stripHTML(q.choices[a]) : "(no choice)";
+      const r = markMCQ({ ok: a === q.answer, marks: it.marks, question: q.stem, picked, correct: "ABCDE"[q.answer] + ". " + stripHTML(q.choices[q.answer]), alt: q.alt, modelHtml: q.answer_html });
+      return r;
+    }
+    const r = markTyped({ user: a || "", ideas: q.ideas || [], marks: it.marks, question: q.stem, alt: q.alt, modelHtml: q.answer_html, manual: (m.manual || {})[key] });
+    return r;
+  }
+  const e = exById[it.id];
+  const codes = Array.isArray(a) ? a : e.files.map(f => f.skeleton);
+  const res = runChecks(e, codes);
+  const rFake = { codes, marks: {} };
+  const out = feedbackAll(e, rFake, res);
+  const scale = it.marks && out.tot ? (it.marks / out.tot) : 1;
+  return { html: out.html, got: Math.round(out.got * scale * 2) / 2, tot: it.marks, kind: out.all ? "full" : (out.got > 0 ? "part" : "none") };
+}
+
+const _mockPage = mockPage, _mockWire = mockWire;
+mockPage = function () {
+  const html = _mockPage();
+  return html;
+};
+mockWire = function () {
+  _mockWire();
+  const M = D.mock, m = S.mock;
+  if (!m || !m.done) return;
+  // auto-mark every item once finished, and inject the rubric under each item
+  m.marks = m.marks || {}; m.auto = m.auto || {}; m.manual = m.manual || {};
+  document.querySelectorAll(".mockitem").forEach((el, idx) => {
+    // find the item by walking sections in order
+  });
+  let n = 0;
+  for (const s of M.sections) {
+    s.items.forEach((it, k) => {
+      const key = s.id + k, a = m.answers[key];
+      const r = mockItemFeedback(it, key, a, m);
+      if (m.auto[key] == null) { m.marks[key] = r.got; m.auto[key] = r.got; }
+      const box = elFeedbackSlot(n);
+      n++;
+      if (box) {
+        el.querySelectorAll(":scope > details.card").forEach(d => d.remove());
+        box.innerHTML = r.html + `<p class="muted">Auto-mark: <b>${fmtM(r.got)}/${fmtM(r.tot)}</b>${m.marks[key] != r.got ? ` · adjusted to ${fmtM(m.marks[key])}` : ""}</p>`;
+        box.querySelectorAll("input[data-idea]").forEach(cb => cb.onchange = () => {
+          m.manual[key] = m.manual[key] || {};
+          box.querySelectorAll("input[data-idea]").forEach(x => m.manual[key][+x.dataset.idea] = x.checked);
+          const r2 = mockItemFeedback(it, key, m.answers[key], m);
+          m.marks[key] = r2.got; m.auto[key] = r2.got; m.t = Date.now(); save(); render();
+        });
+      }
+    });
+  }
+  m.t = Date.now(); save();
+  const tot = Object.values(m.marks || {}).reduce((x, y) => x + (+y || 0), 0);
+  const sum = document.querySelector("b"); // fallback; we add a total banner
+  const banner = document.createElement("div"); banner.className = "note"; banner.innerHTML = `<b>Instant mark: ${fmtM(tot)} / 100</b> (auto-marked with the same rubric as the quiz; you can still type a mark in the box to adjust the export).`;
+  const h2 = document.querySelector("#main h2"); if (h2 && !document.getElementById("mockAuto")) { banner.id = "mockAuto"; h2.after(banner); }
+};
+
+function elFeedbackSlot(n) {
+  const items = document.querySelectorAll(".mockitem");
+  const el = items[n]; if (!el) return null;
+  let slot = el.querySelector(".mockfb");
+  if (!slot) { slot = document.createElement("div"); slot.className = "mockfb"; el.appendChild(slot); }
+  return slot;
+}
+
+/* exercise self-mark: the Check rubric is the mark; auto-done when all TODOs are full */
+const _showModel = showModel;
+showModel = function () {
+  _showModel();
+  const wrap = $("#selfmark"); if (!wrap || !cur) return;
+  const { e, r } = cur;
+  if (r.lastAll && !r.done && !cur.flow) { r.done = true; addXP(r.peeked ? 10 : 25); S.streak = (S.streak || 0) + 1; save(); nav(); }
+  if (r.lastMarks) wrap.innerHTML = `<div class="card"><h3>Your mark</h3><p>Instant feedback (from ✔ Check): <b>${esc(r.lastMarks)}</b>. ${r.done ? "✅ Marked done." : "Fix the missing pieces and press Check again."}</p></div>`;
+};
+
+const _exWire = exWire;
+exWire = function () {
+  _exWire();
+  const btn = $("#bCheck");
+  if (!btn || !cur) return;
+  btn.addEventListener("click", () => {
+    const { e, r } = cur;
+    if (r.lastAll && !r.done && !cur.flow) { r.done = true; addXP(r.peeked ? 10 : 25); S.streak = (S.streak || 0) + 1; save(); nav(); }
+    const wrap = $("#selfmark");
+    if (wrap && r.lastMarks) wrap.innerHTML = `<div class="card"><h3>Your mark</h3><p>Instant feedback (from ✔ Check): <b>${esc(r.lastMarks)}</b>. ${r.done ? "✅ Marked done." : "Fix the missing pieces and press Check again."}</p></div>`;
+  });
+};
+
 
 /* ---------- router ---------- */
 function render() {
