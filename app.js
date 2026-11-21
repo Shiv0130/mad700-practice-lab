@@ -12,7 +12,7 @@ const fById = Object.fromEntries((D.flow || []).map(e => [e.id, e]));
 const ROUTES = {};
 
 /* ---------- storage: localStorage + IndexedDB mirror, file-based sync ---------- */
-let S = { v: 1, xp: 0, streak: 0, ex: {}, quiz: {}, cards: {}, fill: {}, reels: {}, mock: null, t: 0 };
+let S = { v: 1, xp: 0, streak: 0, ex: {}, quiz: {}, cards: {}, vw: {}, fill: {}, reels: {}, mock: null, t: 0 };
 try { const j = JSON.parse(localStorage.getItem(KEY + ".state") || "null"); if (j) S = Object.assign(S, j); } catch (e) {}
 let idb = null;
 try {
@@ -32,7 +32,7 @@ function save() {
 }
 function merge(a, b) {  // newer record wins, per item
   const out = JSON.parse(JSON.stringify(a));
-  for (const k of ["ex", "quiz", "cards", "fill"]) {
+  for (const k of ["ex", "quiz", "cards", "vw", "fill"]) {
     out[k] = out[k] || {};
     for (const [id, r] of Object.entries(b[k] || {})) if (!out[k][id] || (r.t || 0) > (out[k][id].t || 0)) out[k][id] = r;
   }
@@ -97,12 +97,14 @@ function secStats(sid) {
 function nav() {
   const h = location.hash || "#/";
   const link = (href, label, tick) => `<a href="${href}" class="${h === href || (href !== "#/" && h.startsWith(href + "/")) ? "active" : ""}">${label}${tick ? `<span class="tick">${tick}</span>` : ""}</a>`;
-  let s = "<h6>Start</h6>" + link("#/", "🏠 Home + pointer map") + link("#/plan", "🗓 Game plan");
-  s += "<h6>Flow through the lecturer's questions</h6>" + link("#/flow", "🌊 Flow mode", flowTick()) + link("#/map", "🗺 Pointer map") + link("#/cheat", "🧾 Cheatsheet (print)");
+  const EMO = { P1: "📱", P2: "🎨", P3: "📜", P4: "📋", P5: "🗄️", LR: "🧩" };
+  let s = link("#/", "🏠 Home");
   s += "<h6>Exam pointers</h6>";
-  for (const x of D.secs) { const st = secStats(x.id); s += link("#/s/" + x.id, esc(x.short), `${st.exDone}/${st.ex}`); }
-  s += "<h6>Practise</h6>" + link("#/quiz/ALL", "🧠 Mixed quiz") + link("#/cards/ALL", "🃏 Keycards") + link("#/fill", "✏️ Fill-ins (practice only)") + link("#/videos", "🎬 My lesson videos") + link("#/study", "📓 NotebookLM + Vaia") + link("#/reels", "📱 Reels feed") + link("#/mock", "⏱ Timed mock (3 h)");
-  s += "<h6>You</h6>" + link("#/settings", "⚙️ Themes, sync, export");
+  for (const x of D.secs) { const st = secStats(x.id); s += link("#/s/" + x.id, (EMO[x.id] || "") + " " + esc(x.short), `${st.exDone}/${st.ex}`); }
+  s += "<h6>Challenge</h6>" + link("#/flow", "🌊 Flow mode", flowTick()) + link("#/mock", "⏱ Timed mock (3 h)") + link("#/fill", "✏️ Fill-ins (practice only)");
+  s += "<h6>Practise</h6>" + link("#/quiz/ALL", "🧠 Mixed quiz") + link("#/cheat", "🧾 Cheatsheet (print)") + link("#/plan", "🗓 Game plan");
+  s += "<h6>Study map</h6>" + link("#/map", "🗺 Resource map") + link("#/videos", "🎬 Videos") + link("#/reels", "📱 Reels feed") + link("#/study", "🎓 Vaia cards + 📓 NotebookLM");
+  s += "<h6>Appearance</h6>" + link("#/settings", "⚙️ Themes, sync, export");
   $("#nav").innerHTML = s;
 }
 $("#menuBtn").addEventListener("click", () => document.body.classList.toggle("nav-open"));
@@ -116,18 +118,18 @@ function home() {
     const st = secStats(x.id), pc = st.ex ? Math.round(100 * st.exDone / st.ex) : 0;
     const lv = LV.map(l => { const n = D.ex.filter(e => e.sec === x.id && e.level === l); return `<span class="lvl ${l}">${l} ${n.filter(e => exDone(e.id)).length}/${n.length}</span>`; }).join("");
     cards += `<div class="card"><h3 style="margin:4px 0"><a href="#/s/${x.id}">${esc(x.title)}</a></h3><p class="muted" style="margin:4px 0">${esc(x.pointer)}</p>
-      <div class="prog"><i style="width:${pc}%"></i></div><div>${lv}</div><p class="src">Quiz ${st.qDone}/${st.q} · Cards ${D.cards.filter(c => c.sec === x.id).length}</p>
+      <div class="prog"><i style="width:${pc}%"></i></div><div>${lv}</div><p class="src">Quiz ${st.qDone}/${st.q}</p>
       <div class="row"><a class="btn sm" href="#/s/${x.id}">Lesson</a><a class="btn sm" href="#/s/${x.id}/code">// TODO code</a><a class="btn sm" href="#/quiz/${x.id}">Quiz</a></div></div>`;
   }
   return `<h2>MAD700 Practice Lab</h2>
   <div class="note"><b>Exam:</b> Tue 24 Nov 2026, 09:00-12:00 (SAST), Lab 1. Paper style = the CA test: <b>// TODO</b> incomplete Java and XML, no fill-in-the-blanks. Strictly Mr Siyah's pointers P1-P5 (9 Nov) + light review.</div>
   <div class="note">How checking works: Android code can't run in a browser, so <b>Check</b> looks for the exact names and attributes the memo gives marks for, then you <b>self-mark</b> each TODO against the commented model answer. Run the code in Android Studio when you can.</div>
-  <div class="row"><a class="btn" href="#/flow">🌊 Start Flow mode (the lecturer's questions, in order)</a><a class="btn sec" href="#/map">🗺 Pointer map</a><a class="btn sec" href="#/cheat">🧾 Cheatsheet</a><a class="btn sec" href="#/fill">✏️ Fill-ins</a><a class="btn sec" href="#/reels">📱 Reels</a></div>
+  <div class="row"><a class="btn" href="#/flow">🌊 Start Flow mode (the lecturer's questions, in order)</a><a class="btn sec" href="#/map">🗺 Pointer map</a><a class="btn sec" href="#/cheat">🧾 Cheatsheet</a><a class="btn sec" href="#/fill">✏️ Fill-ins</a><a class="btn sec" href="#/videos">🎬 Videos</a><a class="btn sec" href="#/study">🎓 Vaia cards + 📓 NotebookLM</a><a class="btn sec" href="#/reels">📱 Reels</a></div>
   <h3>Pointers</h3><div class="grid2">${cards}</div>
   <div class="card"><h3>Exam-morning keyword card</h3>${D.home.keywords}</div>
   <details class="card"><summary><b>Exam facts and how answers earn marks</b></summary>${D.home.facts}</details>
   <details class="card"><summary><b>Source clashes (know both, follow the paper)</b></summary>${D.home.clashes}</details>
-  <p class="src">Built ${esc(D.built)}. Sources: MAD700 lean pack (cheat sheet, 30 to-do questions + answers, keycards v2), question bank, study guide, Siyah's files. Model answers stay hidden until you attempt.</p>`;
+  <p class="src">Built ${esc(D.built)}. Sources: MAD700 lean pack (cheat sheet, 30 to-do questions + answers), question bank, study guide, Siyah's files. Keycards are not in this lab: they already live in Vaia and your NotebookLM notebook (see Vaia cards + NotebookLM). Model answers stay hidden until you attempt.</p>`;
 }
 function plan() {
   return `<h2>Game plan to Tue 24 Nov</h2><div class="card"><ol>
@@ -153,10 +155,10 @@ function secPage(sid, tab) {
     }).join("");
   }).join("");
   if (tab === "quiz") body = `<p><a class="btn" href="#/quiz/${sid}">Start the ${esc(x.short)} quiz (${D.quiz.filter(q => q.sec === sid).length} questions)</a></p>`;
-  if (tab === "cards") body = `<p><a class="btn" href="#/cards/${sid}">Flip the ${D.cards.filter(c => c.sec === sid).length} keycards</a></p>`;
-  if (tab === "videos") { body = lessonVideosHTML(sid) + studyCard(sid) + "<h3>Reels for this pointer</h3>" + reelsHTML(sid); }
+  if (tab === "cards") body = studyCard(sid);
+  if (tab === "videos") { body = lessonVideosHTML(sid) + "<h3>Reels for this pointer</h3>" + reelsHTML(sid); }
   if (tab === "map") body = pointerSection(sid);
-  return `<h2>${esc(x.title)}</h2><p class="muted">${esc(x.pointer)}</p><div class="tabs">${t("lesson", "📖 Lesson")}${t("code", "💻 // TODO code")}${t("quiz", "🧠 Quiz")}${t("cards", "🃏 Cards")}${t("map", "🗺 Map")}${t("videos", "🎬 Videos")}</div>${body}`;
+  return `<h2>${esc(x.title)}</h2><p class="muted">${esc(x.pointer)}</p><div class="tabs">${t("lesson", "📖 Lesson")}${t("code", "💻 // TODO code")}${t("quiz", "🧠 Quiz")}${t("cards", "🎓 Vaia + 📓 NB")}${t("map", "🗺 Map")}${t("videos", "🎬 Videos")}</div>${studyBtns(sid)}${body}`;
 }
 
 /* ---------- exercise ---------- */
@@ -296,27 +298,6 @@ function quizWire(sid) {
   function wireNext() { $("#qNext").onclick = () => { z.i++; render(); }; }
 }
 
-/* ---------- keycards ---------- */
-let CD = null;
-function cardsPage(sid) {
-  if (!CD || CD.sid !== sid) { const l = D.cards.filter(c => sid === "ALL" || c.sec === sid); CD = { sid, list: l.slice().sort((a, b) => ((S.cards[a.id] || {}).box || 0) - ((S.cards[b.id] || {}).box || 0)), i: 0, flip: false }; }
-  const z = CD; if (!z.list.length) return "<p>No cards here.</p>";
-  if (z.i >= z.list.length) return `<h2>All ${z.list.length} cards seen</h2><button id="cAgain">Again (weakest first)</button>`;
-  const c = z.list[z.i];
-  return `<h2>Keycards ${esc(sid === "ALL" ? "(all)" : secById[sid].short)}</h2><p class="muted">${z.i + 1}/${z.list.length} · tap the card to flip</p>
-  <div class="card flash" id="flip">${z.flip ? `<pre>${esc(c.back)}</pre>` : `<p style="font-size:17px">${esc(c.front)}</p>`}</div>
-  <p class="src">${esc(c.tags)} · <b>Source:</b> ${esc(c.source)}</p>
-  ${z.flip ? `<div class="row"><button id="cAgain1" class="warn">Again</button><button id="cGood">Knew it</button></div>` : ""}`;
-}
-function cardsWire() {
-  const z = CD; if (!z) return;
-  if ($("#cAgain")) { $("#cAgain").onclick = () => { CD = null; render(); }; return; }
-  $("#flip") && ($("#flip").onclick = () => { z.flip = !z.flip; render(); });
-  const c = z.list[z.i];
-  const mark = good => { const r = S.cards[c.id] || { box: 0 }; r.box = good ? Math.min(5, (r.box || 0) + 1) : 0; r.t = Date.now(); S.cards[c.id] = r; if (good) addXP(2); else save(); z.i++; z.flip = false; render(); };
-  $("#cGood") && ($("#cGood").onclick = () => mark(true)); $("#cAgain1") && ($("#cAgain1").onclick = () => mark(false));
-}
-
 /* ---------- videos & reels ---------- */
 function videosHTML(sid) {
   const list = D.videos.filter(v => !sid || v.sec === sid || v.sec === "ALL");
@@ -406,7 +387,7 @@ function settingsWire() {
       const qq = D.quiz.filter(q => q.sec === x.id), miss = qq.filter(q => S.quiz[q.id] && !S.quiz[q.id].ok); L.push(`quiz: ${qq.filter(q => S.quiz[q.id]).length}/${qq.length} tried, missed: ${miss.map(q => q.title).join("; ") || "none"}`, ""); }
     download(`MAD700_lab_progress_${stamp()}.txt`, L.join("\n"));
   };
-  $("#pWipe").onclick = () => { if (confirm("Erase ALL lab progress on this device?")) { S = { v: 1, xp: 0, streak: 0, ex: {}, quiz: {}, cards: {}, fill: {}, reels: {}, mock: null, t: Date.now() }; save(); render(); } };
+  $("#pWipe").onclick = () => { if (confirm("Erase ALL lab progress on this device?")) { S = { v: 1, xp: 0, streak: 0, ex: {}, quiz: {}, cards: {}, vw: {}, fill: {}, reels: {}, mock: null, t: Date.now() }; save(); render(); } };
 }
 
 /* ===== MAD700 lab plugin: instant feedback, Flow mode, pointer map, fill-ins, reels, lesson videos, cheatsheet ===== */
@@ -551,7 +532,7 @@ function lessonVideosHTML(sid) {
   D.local_videos.forEach((v, idx) => {
     const chs = (v.chapters || []).filter(c => !sid || c.ptr === sid);
     if (sid && !chs.length && !(v.ptrs || []).includes(sid)) return;
-    h += `<div class="card vcard" data-vi="${idx}"><b>${esc(v.title)}</b>
+    h += `<div class="card vcard" data-vi="${idx}"><label style="float:right;font-size:13px"><input type="checkbox" data-vw="${esc(v.file)}" ${(S.vw || {})[v.file] ? "checked" : ""}> Watched</label><b>${esc(v.title)}</b>
       <video controls preload="none" playsinline style="width:100%;border-radius:10px;margin-top:6px;background:#000" src="${esc(v.file)}">${v.vtt ? `<track kind="subtitles" src="${esc(v.vtt)}" srclang="en" label="English" default>` : ""}</video>
       <div class="vmiss note" style="display:none">The full-quality video isn't in the hosted copy (the host cannot take big files). <button class="btn sm vlite">▶ Play the hosted lite copy (small, 854p)</button> or, for full quality offline, unzip <b>mad700_lab_videos_v2.zip</b> next to index.html so the <code>videos/</code> folder sits beside it.<span class="vstat src"></span></div>
       ${chs.length ? `<div class="chap"><b>Chapters${sid ? " for " + esc(ptrName(sid)) : ""}:</b> ${chs.map(c => `<button class="sec sm" data-vt="${c.t}" data-vi="${idx}">${fmtT(c.t)} ${esc(c.label)}</button>`).join(" ")}</div>` : ""}</div>`;
@@ -589,7 +570,9 @@ function vidWire() {
     const btn = card.querySelector(".vlite"); if (btn) btn.onclick = () => loadLite(card).then(() => v.play().catch(() => {})).catch(() => {});
     if (web) fetch(v.getAttribute("src"), { method: "HEAD" }).then(r => { if (!r.ok) show(); }).catch(show);
   });
-  document.querySelectorAll("[data-vt]").forEach(b => b.onclick = () => { const card = b.closest(".vcard"), v = card.querySelector("video");
+  document.querySelectorAll("[data-vw]").forEach(c => c.onchange = () => { S.vw = S.vw || {}; if (c.checked) S.vw[c.dataset.vw] = Date.now(); else delete S.vw[c.dataset.vw]; save(); const n = document.getElementById("vwcount"); if (n) n.textContent = Object.keys(S.vw).filter(k => D.local_videos.some(v => v.file === k)).length; });
+  document.querySelectorAll("[data-vt]").forEach(b => b.onclick = () => { const card = b.closest(".vcard") || document.querySelector('.vcard[data-vi="' + b.dataset.vi + '"]'); if (!card) return; const v = card.querySelector("video");
+    if (b.dataset.ext) card.scrollIntoView({ block: "center" });
     const seek = () => { v.currentTime = +b.dataset.vt; v.play().catch(() => {}); };
     const go = () => { if (v.readyState < 1) { v.addEventListener("loadedmetadata", seek, { once: true }); v.load(); } else seek(); };
     const m = card.querySelector(".vmiss");
@@ -631,12 +614,30 @@ function studyCard(sid) {
   const cp = (k, t) => `<details><summary>${esc(t)}</summary><div class="note" style="white-space:pre-wrap;user-select:all">${esc(st.prompts[k])}</div><button class="btn sm sec" data-copy="${esc(st.prompts[k])}">Copy prompt</button></details>`;
   return `<div class="card studycard"><b>📓 NotebookLM + 🎓 Vaia for ${esc(sid)}</b>
     <div class="links studylinks" style="margin:8px 0"><a class="btn sm" href="${esc(L.vaia_url)}" target="_blank" rel="noopener" data-study="vaia">🎓 Open Vaia study set</a> <a class="btn sm sec" href="${esc(L.nb_url)}" target="_blank" rel="noopener" data-study="nb">📓 Open NotebookLM notebook</a></div>
-    <div class="grid2"><div><b>🎓 Vaia: filter by tag</b><div class="note" style="margin:6px 0">Tag <b>${esc(st.tag)}</b> <span class="src">(full tag: ${esc(st.full)})</span><br>${st.cards} cards planned for this tag. Alternative filter: <b>${esc(st.topic)}</b> (also catches the sample/old-test cards).</div><div class="src">Cards to expect:</div>${li(st.eg)}</div>
-    <div><b>📓 NotebookLM: tick these sources</b>${li(st.decks.concat(st.pack))}<div class="src">Also: your own videos${myv.length ? " (" + esc(myv.join("; ")) + ")" : ""}, and the <b>Recap (1-5)</b> video already in the notebook.</div></div></div>
-    <b>Ask NotebookLM (copy, then paste into its chat or Studio)</b>${cp("quiz", "Quiz prompt")}${cp("overview", "Video Overview prompt")}${cp("cards", "Flashcard prompt")}
+    <div class="grid2"><div><b>🎓 Vaia: filter by tag</b><div class="note" style="margin:6px 0">Tag <b>${esc(st.tag)}</b> <span class="src">(full tag: ${esc(st.full)})</span><br>About ${st.cards} cards already carry this tag in Vaia (from the tag plan). Alternative filter: <b>${esc(st.topic)}</b> (also catches the sample/old-test cards).</div><div class="src">Cards to expect:</div>${li(st.eg)}</div>
+    <div><b>📓 NotebookLM: sources to tick in the notebook</b>${li(st.decks.concat(st.pack))}<div class="src">Also: your own videos${myv.length ? " (" + esc(myv.join("; ")) + ")" : ""}, and the <b>Recap (1-5)</b> video already in the notebook.</div></div></div>
+    <b>Ask NotebookLM (copy, then paste into its chat or Studio)</b>${cp("quiz", "Quiz prompt")}${cp("overview", "Video Overview prompt")}
     <div class="src" style="margin-top:6px">${esc(L.nb_note)}</div></div>`;
 }
 ROUTES.study = () => [`<h2>📓🎓 Study tools: NotebookLM + Vaia</h2><div class="note">Per exam pointer: which Vaia tag to filter, which NotebookLM sources to tick, and prompts for a quiz, a video overview and flashcards. <a href="${esc(D.study_links.nb_url)}" target="_blank" rel="noopener">${esc(D.study_links.nb_label)}</a> · <a href="${esc(D.study_links.vaia_url)}" target="_blank" rel="noopener">${esc(D.study_links.vaia_label)}</a></div><div class="note warn"><b>Check the Vaia set.</b> ${esc(D.study_links.vaia_note)}</div>${D.secs.filter(s => D.study[s.id]).map(s => `<h3>${esc(s.title)}</h3>${studyCard(s.id)}`).join("")}`, null];
+/* ---------- contextual study buttons (ML600 style) ---------- */
+function studyBtns(sid) {
+  const st = (D.study || {})[sid], L = D.study_links; if (!st) return "";
+  return `<div class="links studylinks" style="margin:6px 0 4px"><a class="btn sm" href="${esc(L.vaia_url)}" target="_blank" rel="noopener" data-study="vaia">🎓 Review cards on Vaia</a> <a class="btn sm sec" href="${esc(L.nb_url)}" target="_blank" rel="noopener" data-study="nb">📓 Quiz on NotebookLM</a></div><div class="muted" style="font-size:13px;margin:0 0 8px">Vaia: filter tag <b>${esc(st.tag)}</b> · NotebookLM: “${esc(L.nb_label)}”. The cards already exist there; this lab does not duplicate them.</div>`;
+}
+ROUTES.cards = p => { const o = ROUTES.study(p); o[0] = `<div class="note">This lab holds no keycards of its own: they already exist in Vaia (filter by the tag below) and in your NotebookLM notebook.</div>` + o[0]; return o; };
+ROUTES.videos = () => {
+  const n = D.local_videos.length, ticked = Object.keys(S.vw || {}).filter(k => D.local_videos.some(v => v.file === k)).length;
+  const chips = [["vp-mine", "My videos"], ...D.secs.map(s => ["vp-" + s.id, s.short.startsWith(s.id) ? s.short : s.id + " " + s.short])].map(([id, t]) => `<a class="btn sm sec" href="#${location.hash.split("?")[0]}" data-scroll="${id}">${esc(t)}</a>`).join(" ");
+  const secs = D.secs.map(s => {
+    const jumps = D.local_videos.map((v, idx) => (v.chapters || []).filter(c => c.ptr === s.id).map(c => `<button class="sec sm" data-ext="1" data-vt="${c.t}" data-vi="${idx}">${esc(v.title.split(":")[0])} · ${fmtT(c.t)} ${esc(c.label)}</button>`).join(" ")).join(" ");
+    const whole = D.local_videos.map((v, idx) => (!(v.chapters || []).some(c => c.ptr === s.id) && (v.ptrs || []).includes(s.id)) ? `<button class="sec sm" data-ext="1" data-vt="0" data-vi="${idx}">${esc(v.title)}</button>` : "").join(" ");
+    return `<h3 id="vp-${s.id}">${PEMO[s.id] || ""} ${esc(s.title)}</h3><div class="card">${jumps.trim() || whole.trim() ? `<b>Jump to my video chapters:</b><div class="chap">${jumps} ${whole}</div>` : `<span class="muted">No video of mine covers this pointer yet.</span>`}${reelsHTML(s.id) ? `<details style="margin-top:8px"><summary><b>Reels for ${esc(s.id)}</b></summary>${reelsHTML(s.id)}</details>` : ""}<div style="margin-top:8px"><a class="btn sm sec" href="#/pointer/${s.id}">Full map</a> <a class="btn sm sec" href="${esc(D.study_links.vaia_url)}" target="_blank" rel="noopener">🎓 Vaia: ${esc((D.study[s.id] || {}).tag || "")}</a> <a class="btn sm sec" href="${esc(D.study_links.nb_url)}" target="_blank" rel="noopener">📓 NotebookLM</a></div></div>`; }).join("");
+  return [`<h2>🎬 Videos</h2><div class="note">Your own videos (scope reteach, lessons, recap) organised by the exam pointers, each with subtitles and chapter buttons. Short YouTube reels are on the <a href="#/reels">Reels feed</a> and per pointer below.</div>
+  <div class="note warn">Tick <b>Watched</b> when you finish a video. The tick is saved on this device. Ticked <b id="vwcount">${ticked}</b> of ${n}.</div>
+  <div class="row" style="flex-wrap:wrap;margin:8px 0">${chips}</div>
+  <h3 id="vp-mine">💛 My videos</h3>${lessonVideosHTML(null)}${secs}`, () => { vidWire(); reelWire(); document.querySelectorAll("[data-scroll]").forEach(a => a.onclick = e => { e.preventDefault(); const t = document.getElementById(a.dataset.scroll); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }); }];
+};
 /* ---------- pointer map ---------- */
 function pointerSection(sid) {
   const x = secById[sid], m = D.pmap[sid] || { sg: [], slides: [], papers: [] };
@@ -645,13 +646,30 @@ function pointerSection(sid) {
   return `<section class="pmap" id="map-${sid}"><h3>${esc(x.title)}</h3><p class="muted">${esc(x.pointer)}</p>
   <div class="grid2"><div class="card"><b>Study guide pages</b>${li(m.sg)}</div><div class="card"><b>Lecturer slides</b>${li(m.slides)}</div></div>
   <div class="card"><b>CA / past-paper questions</b>${li(m.papers)}<b>Flow steps (${steps.length})</b>${steps.length ? `<ul>${steps.map(s => `<li><a href="#/f/${s.id}">${esc(s.group)} · ${esc(s.title)}</a> (${s.marks} marks)</li>`).join("")}</ul>` : "<p class='muted'>none for this pointer (practice sets below)</p>"}
-    <b>More // TODO sets:</b> <a href="#/s/${sid}/code">${ex.length} sets (easy/medium/hard)</a> · <b>Quiz</b> <a href="#/quiz/${sid}">${D.quiz.filter(q => q.sec === sid).length} questions</a> · <b>Keycards</b> <a href="#/cards/${sid}">${D.cards.filter(c => c.sec === sid).length}</a></div>
+    <b>More // TODO sets:</b> <a href="#/s/${sid}/code">${ex.length} sets (easy/medium/hard)</a> · <b>Quiz</b> <a href="#/quiz/${sid}">${D.quiz.filter(q => q.sec === sid).length} questions</a> · <b>Cards</b> <a href="${esc(D.study_links.vaia_url)}" target="_blank" rel="noopener">Vaia, tag ${esc((D.study[sid] || {}).tag || "")}</a></div>
   <div class="card"><b>My lesson videos + chapter timestamps</b>${lessonVideosHTML(sid)}</div>
   ${studyCard(sid)}
   <div class="card"><b>Reels (${reels.length})</b><ul>${reels.map(v => `<li><a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.title)}</a> <span class="src">${esc(v.len)} · ${esc(v.chan)}</span></li>`).join("")}</ul><a class="btn sm sec" href="#/reels/${sid}">Open as feed</a></div>
   <div class="card"><b>Fill-ins (${fills.length}, practice only: the exam uses // TODO)</b> <a class="btn sm sec" href="#/fill/${sid}">Practise</a></div></section>`;
 }
-ROUTES.map = () => [`<h2>🗺 Pointer map</h2><div class="note">One section per exam pointer: where it lives in the study guide and slides, which CA / past-paper questions test it, the Flow steps, your lesson video with chapter timestamps, reels and fill-ins. ${D.secs.map(s => `<a href="#map-${s.id}" onclick="document.getElementById('map-${s.id}').scrollIntoView();return false">${esc(s.id)}</a>`).join(" · ")}</div>${D.secs.map(s => pointerSection(s.id)).join("")}`, vidWire];
+const PEMO = { P1: "📱", P2: "🎨", P3: "📜", P4: "📋", P5: "🗄️", LR: "🧩" };
+const mapJump = cur => `<nav class="mapjump" style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${D.secs.map(s => `<a class="btn sm ${s.id === cur ? "" : "sec"}" href="#/pointer/${s.id}">${esc(s.id)}</a>`).join("")}<a class="btn sm sec" href="#/map">All pointers</a></nav>`;
+function mapChips(sid) {
+  const st = secStats(sid), fl = D.flow.filter(s => s.sec === sid), fd = fl.filter(s => exDone(s.id)).length, vn = D.local_videos.filter(v => (v.ptrs || []).includes(sid)).length;
+  const vw = D.local_videos.filter(v => (v.ptrs || []).includes(sid) && (S.vw || {})[v.file]).length;
+  const chip = (ok, t) => `<span class="lvl ${ok ? "easy" : ""}" style="margin-right:6px">${t}</span>`;
+  return `<div class="mapprog" style="margin:6px 0">${chip(fl.length && fd === fl.length, "Flow " + fd + "/" + fl.length)}${chip(st.ex && st.exDone === st.ex, "TODO sets " + st.exDone + "/" + st.ex)}${chip(st.q && st.qDone === st.q, "Quiz " + st.qDone + "/" + st.q)}${chip(vn && vw === vn, "Videos watched " + vw + "/" + vn)}</div>`;
+}
+ROUTES.map = () => {
+  const L = D.study_links;
+  const cards = D.secs.map(s => { const m = D.pmap[s.id] || { sg: [] };
+    return `<div class="card mapcard"><h3 style="margin:0 0 4px"><a href="#/pointer/${s.id}">${PEMO[s.id] || ""} ${esc(s.title)}</a></h3>${mapChips(s.id)}<p class="muted" style="margin:0 0 8px">${esc((m.sg || []).slice(0, 3).join(" · "))}</p>
+    <div class="row"><a class="btn sm sec" href="#/pointer/${s.id}">Open the full map</a><a class="btn sm sec" href="#/s/${s.id}">Lab section</a><a class="btn sm sec" href="#/quiz/${s.id}">Quiz</a><a class="btn sm sec" href="#/reels/${s.id}">Reel</a><a class="btn sm sec" href="#/videos">Videos</a>${D.study[s.id] ? `<a class="btn sm sec" href="${esc(L.vaia_url)}" target="_blank" rel="noopener">Vaia: ${esc(D.study[s.id].tag)}</a>` : ""}</div></div>`; }).join("");
+  return [`<h2>🗺 Resource map</h2><div class="note">Every source, parked under the exam pointers: study guide pages, lecturer slides, CA / past-paper questions, Flow steps, your videos with chapter jumps, reels, Vaia (tag filter) and NotebookLM.</div>${mapJump()}
+  <div class="row" style="margin:0 0 14px"><a class="btn sm sec" href="#/reels">Reels</a><a class="btn sm sec" href="#/videos">Videos</a><a class="btn sm sec" href="#/study">Vaia + NotebookLM per pointer</a><a class="btn sm sec" href="${esc(L.vaia_url)}" target="_blank" rel="noopener">Vaia set 71309502</a><a class="btn sm sec" href="${esc(L.nb_url)}" target="_blank" rel="noopener">NotebookLM notebook</a></div>${cards}`, null];
+};
+ROUTES.pointer = p => { const sid = p[1]; if (!secById[sid]) return ROUTES.map();
+  return [`<h2>${PEMO[sid] || ""} ${esc(secById[sid].title)}</h2><div class="note">Exact locations in every source, plus your progress on this pointer.</div>${mapJump(sid)}${mapChips(sid)}${pointerSection(sid)}`, () => { vidWire(); reelWire(); }]; };
 
 /* ---------- fill-in-the-blanks (practice only) ---------- */
 const nrm = s => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -925,7 +943,6 @@ function render() {
   else if (p[0] === "f") { html = exPage(p[1], true); wire = fById[p[1]] ? exWire : null; }
   else if (p[0] === "ex") { html = exPage(p[1]); wire = exById[p[1]] ? exWire : null; }
   else if (p[0] === "quiz") { html = quizPage(p[1] || "ALL"); wire = () => quizWire(p[1] || "ALL"); }
-  else if (p[0] === "cards") { html = cardsPage(p[1] || "ALL"); wire = cardsWire; }
   else if (p[0] === "videos") { html = "<h2>My lesson videos</h2>" + lessonVideosHTML(null); wire = vidWire; }
   else if (p[0] === "mock") { html = mockPage(); wire = mockWire; }
   else if (p[0] === "settings") { html = settingsPage(); wire = settingsWire; }
